@@ -8,6 +8,7 @@
 #include "hardware/flash.h"
 #include "hardware/gpio.h"
 #include "hardware/pio.h"
+#include "hardware/dma.h"
 #include "hardware/vreg.h"
 #include "hardware/watchdog.h"
 #include "pico/multicore.h"
@@ -139,7 +140,19 @@ static bool config_is_valid(void)
 
 static bool config_load(void)
 {
-    memcpy(config.bin, flash_target_contents_config, sizeof(config));
+    int ch = dma_claim_unused_channel(true);
+
+    dma_channel_config c = dma_channel_get_default_config(ch);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+    channel_config_set_read_increment(&c, true);
+    channel_config_set_write_increment(&c, true);
+
+    dma_channel_configure(ch, &c, config.bin, flash_target_contents_config, sizeof(config) / 4, true);
+
+    dma_channel_wait_for_finish_blocking(ch);
+
+    dma_channel_unclaim(ch);
+
     return config_is_valid();
 }
 
@@ -168,9 +181,38 @@ static bool config_save_slow(void)
     return ret;
 }
 
+static void ram_clear(void)
+{
+    static uint32_t zero = 0;
+    int ch = dma_claim_unused_channel(true);
+
+    dma_channel_config c = dma_channel_get_default_config(ch);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+    channel_config_set_read_increment(&c, false);
+    channel_config_set_write_increment(&c, true);
+
+    dma_channel_configure(ch, &c, ram, &zero, sizeof(ram) / 4, true);
+
+    dma_channel_wait_for_finish_blocking(ch);
+
+    dma_channel_unclaim(ch);
+}
+
 static bool rom_load(int32_t bank)
 {
-    memcpy(rom, flash_target_contents_rom[bank], sizeof(rom));
+    int ch = dma_claim_unused_channel(true);
+
+    dma_channel_config c = dma_channel_get_default_config(ch);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+    channel_config_set_read_increment(&c, true);
+    channel_config_set_write_increment(&c, true);
+
+    dma_channel_configure(ch, &c, rom, flash_target_contents_rom[bank], sizeof(rom) / 4, true);
+
+    dma_channel_wait_for_finish_blocking(ch);
+
+    dma_channel_unclaim(ch);
+
     return true;
 }
 
@@ -185,6 +227,29 @@ static bool rom_load_slow(int32_t bank)
     set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
     return ret;
+}
+
+static int32_t rom_load_async_start(int32_t bank)
+{
+    int ch = dma_claim_unused_channel(true);
+
+    dma_channel_config c = dma_channel_get_default_config(ch);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+    channel_config_set_read_increment(&c, true);
+    channel_config_set_write_increment(&c, true);
+
+    dma_channel_configure(ch, &c, rom, flash_target_contents_rom[bank], sizeof(rom) / 4, true);
+
+    return ch;
+}
+
+static bool rom_load_async_wait(int32_t ch)
+{
+    dma_channel_wait_for_finish_blocking(ch);
+
+    dma_channel_unclaim(ch);
+
+    return true;
 }
 
 static bool rom_save(int32_t bank)
@@ -821,9 +886,11 @@ int main(void)
         config_save();
     }
 
-    // memcpy(rom, cm32p_rom, sizeof(rom));
-    rom_load(config.cfg.rom_bank);
-    memset(ram, 0, sizeof(ram));
+    {
+        int32_t ch = rom_load_async_start(config.cfg.rom_bank);
+        ram_clear();
+        rom_load_async_wait(ch);
+    }
 
     // vreg_set_voltage(VREG_VOLTAGE_1_10); // VREG_VOLTAGE_DEFAULT
     // vreg_set_voltage(VREG_VOLTAGE_1_25);
