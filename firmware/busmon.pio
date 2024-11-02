@@ -1,0 +1,69 @@
+; Copyright (c) 2024 Hirokuni Yano
+;
+; Released under the MIT license.
+; see https://opensource.org/licenses/MIT
+;
+; pin 0-15      A0-A15
+; pin 16-23     D0-D7
+; pin 24-26     EXT
+; pin 27        /CS
+; pin 28        /OE
+; pin 29        /WR
+
+.program busmon_wr
+
+.define PUBLIC addr_bus_width   16
+.define PUBLIC data_bus_width   8
+.define PUBLIC ext_bits_width   3
+.define PUBLIC ctrl_bus_width   3
+.define PUBLIC bit_width        (addr_bus_width + data_bus_width + ext_bits_width + ctrl_bus_width)
+.define wr_pin                  29
+
+public entry_point:
+    pull
+    out     x, 32                       ; ram base address
+    pull
+    out     y, 32                       ; value base address
+.wrap_target
+    wait    0 pin wr_pin                ; wait for rizing edge
+    wait    1 pin wr_pin
+
+    mov     osr, pins                   ; save bus condition
+
+    in      osr, (addr_bus_width + data_bus_width)
+                                        ; data
+    in      y, (32 - data_bus_width)    ; value base address
+    push
+
+    in      osr, addr_bus_width         ; address
+    in      x, (32 - addr_bus_width)    ; ram base address
+    push
+.wrap
+
+
+.program busmon_cap
+
+.define PUBLIC addr_bus_width   16
+.define PUBLIC data_bus_width   8
+.define PUBLIC ext_bits_width   3
+.define PUBLIC ctrl_bus_width   3
+.define PUBLIC bit_width        (addr_bus_width + data_bus_width + ext_bits_width + ctrl_bus_width)
+.define wroe_bit_width          2
+
+capture:
+    in      osr, (bit_width - wroe_bit_width)
+    in      y, wroe_bit_width           ; previous /WR, /OE
+    in      null, (32 - bit_width)
+    mov     y, x                        ; save current /WR, /OE
+    set     x, 0b11                     ; (/WR == 1) && (/OE == 1)
+    jmp     x!=y, no_rdwr
+    push
+no_rdwr:
+public entry_point:
+.wrap_target
+    mov     osr, pins
+    in      osr, bit_width              ; all bits
+    in      null, (32 - wroe_bit_width) ; MSB 2bits = /WR, /OE
+    mov     x, isr
+    jmp     x!=y, capture
+.wrap

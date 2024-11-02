@@ -1,0 +1,58 @@
+; Copyright (c) 2024 Hirokuni Yano
+;
+; Released under the MIT license.
+; see https://opensource.org/licenses/MIT
+;
+; pin 0-15      A0-A15
+; pin 16-23     D0-D7
+; pin 24-26     EXT
+; pin 27        /CS
+; pin 28        /OE
+; pin 29        /WR
+
+.program romemu_io
+
+.define PUBLIC addr_bus_width   16
+.define PUBLIC data_bus_width   8
+.define PUBLIC bit_width        (addr_bus_width + data_bus_width)
+.define PUBLIC addr_bus_offset  (0)
+.define PUBLIC data_bus_offset  (addr_bus_width)
+
+public entry_point:
+    pull
+    out     x, 32                       ; rom base address
+.wrap_target
+    in      pins, addr_bus_width        ; address offset
+    in      x, (32 - addr_bus_width)    ; rom base address
+    ; auto push -> DMA READ ADDR TRIG
+
+    ; auto pull
+    out     pins, data_bus_width        ; outupt data
+.wrap
+
+
+.program romemu_oe
+
+.define PUBLIC addr_bus_width   16
+.define PUBLIC data_bus_width   8
+.define PUBLIC ext_bits_width   3
+.define PUBLIC ctrl_bus_width   3
+.define PUBLIC data_bus_offset  (addr_bus_width)
+.define PUBLIC ctrl_bus_offset  (addr_bus_width + data_bus_width + ext_bits_width)
+.define csoe_bit_width          2
+
+public entry_point:
+.wrap_target
+oe_loop:
+    mov     osr, pins                   ; read /CS,/OE
+    out     x, csoe_bit_width
+    jmp     !x, oe_out                  ; /CS = 0 && /OE == 0
+
+    mov     osr, null
+    out     pindirs, data_bus_width     ; High-Z (input)
+    jmp     oe_loop
+
+oe_out:
+    mov     osr, ~null
+    out     pindirs, data_bus_width     ; output enable
+.wrap
