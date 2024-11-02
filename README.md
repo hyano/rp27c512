@@ -18,7 +18,6 @@
   * 書き込みデータを記録して確認でき、必要に応じてXMODEMでホストと転送することも可能です。
   * 指定した領域へのアクセスを時系列で表示する機能も備えています。
 
-
 ## ハードウェア
 
 * AE-RP2040のピンアサインを27C512に変換するシンプルな基板です。ピンヘッダを用いてAE-RP2040と接続します。
@@ -28,12 +27,25 @@
 * 27C512側の5V電源をAE-RP2040に供給することが可能です。ショットキーバリアダイオードで逆流防止を行っています。
 
 ### 部品一覧
+
 * [RP27C512/AE-RP2040変換基板](hardware/)
 * [RP2040マイコンボードキット](https://akizukidenshi.com/catalog/g/g117542/)
 * [ロープロファイルピンヘッダー(低オス) 1×40(40P) 7.7mm](https://akizukidenshi.com/catalog/g/g102900/)
 * [丸ピンIC用連結ソケット 1×14 MH-1X14-L2](https://akizukidenshi.com/catalog/g/g116982/)
+* [ピンヘッダー (オスL型) 1×40 (40P)](https://akizukidenshi.com/catalog/g/g101627/)
 * [ショットキーバリアダイオード 45V2A SBM245L](https://akizukidenshi.com/catalog/g/g117439/)
 
+### 組み立て
+
+各部品を部品を基板にハンダ付けして取り付けます。
+スペースが狭く、干渉するので、ハンダの量が多くなりすぎないように注意します。
+
+* ショットキーバリアダイオードを基板に取り付けます。
+  * USBケーブルからの電源のみで使用する場合は、取り付ける必要はありません。
+* L型ピンヘッダーを4P分に切断し、基板に取り付けます。
+* 丸ピンIC用連結ヘッダを基板に取り付けます。
+* ロープロファイルピンヘッダーを基板に取り付けます。
+* ロープロファイルピンヘッダーにAE-RP2040を取り付けます。
 
 ## ファームウェア
 
@@ -58,7 +70,18 @@ cp rp27c512.uf2 /Volumes/RPI-RP2
 
 ## 使用方法
 
+### ハードウェアの取り付け
+
+* 基板のICソケットからROM(27C512)を外し、代わりに**RP27C512**を取り付けます。
+* 書き込みアクセスをキャプチャするには、基板下側の4Pピンヘッダのうち、シルクが白く塗りつぶされたピンを/RD信号に接続します。
+* ホストとUSBケーブルで接続します。
+* 電源(5V)は、USBケーブルと基板の両方から供給されます。
+* USBケーブルを接続しなくてもemulatorモードで動作しますが、起動が基板側の起動に間に合わないかもしれません。
+
 ### コマンドラインインタフェース
+
+**RP27C512**をホストとUSBケーブルで接続すると、USBシリアルポートとして認識されます。
+UARTターミナルを使って、コマンドラインインターフェースから各種コマンドを使用して操作することができます。
 
 |コマンド|引数|説明|モード|
 |-|-|-|-|
@@ -126,19 +149,23 @@ mode: emulator
 > 
 ```
 
+## 注意事項
+
+* 作者の手元のごく少数の機器でのみ動作確認しています。使用者の責任で利用してください。
+* 作者は、本デバイスの使用による一切の損害について責任を負いかねます。使用は使用者の責任で行ってください。
+
 ## 利用しているオープンソースソフトウェア
+
 * [XMODEM implementation](https://github.com/Thuffir/xmodem)
   * Copyright 2001-2019 Georges Menie (www.menie.org)
   * Modified by Thuffir in 2019
 * [Micro Read Line library for small and embedded devices with basic VT100 support](https://github.com/dimmykar/microrl-remaster)
-  * Author: Eugene Samoylov aka Helius (ghelius@gmail.com)
-01.09.2011
-  * Remastered by: Dmitry Karasev aka dimmykar (karasevsdmitry@yandex.ru)
-27.09.2021
+  * Author: Eugene Samoylov aka Helius (ghelius@gmail.com) 01.09.2011
+  * Remastered by: Dmitry Karasev aka dimmykar (karasevsdmitry@yandex.ru) 27.09.2021
 
 ## ライセンス
 
 このソフトウェアは[MITライセンス](LICENSE)にて提供しています。  
 Copyright (c) 2024 Hirokuni Yano
 
-利用しているOSSは、そのライセンスに従います。
+利用しているオープンそすソフトウェアは、そのライセンスに従います。
