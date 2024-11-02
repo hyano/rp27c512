@@ -76,6 +76,7 @@ cp rp27c512.uf2 /Volumes/RPI-RP2
 |bank|0,1,2,3|使用するFLASH ROMのバンクを指定する。バンクの指定はFLASH ROMに保存され、次回起動時はそのバンクからROMデータを読み出す。|e/c|
 |load|-|FLASH ROMからデータを読み出す。bankコマンドで指定したバンクを使用する。|e/c|
 |save|-|FLASH ROMにデータを保存する。bankコマンドで指定したバンクを使用する。|e/c|
+|erase|0,1,2,3|FLASH ROMのデータを消去する。バンク番号を明示的に指定する。|e/c|
 |clone|[wait [verify]]|直接接続した27C512からデータを読み出す。読み出し開始までの秒数(wait)と、ベリファイ回数(verify)を指定できる。|-/c|
 
 * モードはe(emulatorモード)、c(cloneモード)を示します。
