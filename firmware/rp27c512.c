@@ -329,7 +329,7 @@ static void core1_entry_clone(void)
     }
 }
 
-void memdump(const uint8_t *mem, uint32_t addr)
+static void memdump(const uint8_t *mem, uint32_t addr)
 {
     for (int y = 0; y < 16; y++)
     {
@@ -343,7 +343,7 @@ void memdump(const uint8_t *mem, uint32_t addr)
     }
 }
 
-void cmd_hello(int argc, const char *const *argv)
+static void cmd_hello(int argc, const char *const *argv)
 {
     printf("hello world\n");
     for (int i = 0; i < argc; i++)
@@ -352,7 +352,7 @@ void cmd_hello(int argc, const char *const *argv)
     }
 }
 
-void cmd_reboot(int argc, const char *const *argv)
+static void cmd_reboot(int argc, const char *const *argv)
 {
     uint32_t delay_ms = REBOOT_DELAY_MS;
     if (argc > 0)
@@ -362,7 +362,7 @@ void cmd_reboot(int argc, const char *const *argv)
     reboot(delay_ms);
 }
 
-void cmd_mode(int argc, const char *const *argv)
+static void cmd_mode(int argc, const char *const *argv)
 {
     if (argc == 2)
     {
@@ -402,12 +402,12 @@ void cmd_mode(int argc, const char *const *argv)
     }
 }
 
-void cmd_gpio(int argc, const char *const *argv)
+static void cmd_gpio(int argc, const char *const *argv)
 {
     printf("GPIO: %08x\n", gpio_get_all());
 }
 
-void cmd_device(int argc, const char *const *argv)
+static void cmd_device(int argc, const char *const *argv)
 {
     if (argc > 1)
     {
@@ -444,7 +444,7 @@ void cmd_device(int argc, const char *const *argv)
     }
 }
 
-void cmd_dump(int argc, const char *const *argv)
+static void cmd_dump(int argc, const char *const *argv)
 {
     static uint32_t addr = 0;
     if (argc > 1)
@@ -455,7 +455,7 @@ void cmd_dump(int argc, const char *const *argv)
     addr += 0x100;
 }
 
-void cmd_dump_watch(int argc, const char *const *argv)
+static void cmd_dump_watch(int argc, const char *const *argv)
 {
     static uint32_t addr = 0;
     printf("\x1b[2J");
@@ -471,7 +471,7 @@ void cmd_dump_watch(int argc, const char *const *argv)
     addr += 0x100;
 }
 
-void cmd_capture(int argc, const char *const *argv)
+static void cmd_capture(int argc, const char *const *argv)
 {
     uint32_t cap;
     uint32_t addr;
@@ -505,7 +505,7 @@ void _outbyte(int c)
     putchar_raw(c);
 }
 
-void cmd_recv(int argc, const char *const *argv)
+static void cmd_recv(int argc, const char *const *argv)
 {
     printf("receive data from host to device (XMODEM CRC)\n");
     XmodemReceiveCrc(NULL, device, sizeof(rom));
@@ -513,7 +513,7 @@ void cmd_recv(int argc, const char *const *argv)
     printf("done.\n");
 }
 
-void cmd_send(int argc, const char *const *argv)
+static void cmd_send(int argc, const char *const *argv)
 {
     printf("send data from device to host (XMODEM 1K)\n");
     XmodemTransmit1K(NULL, device, sizeof(rom));
@@ -521,7 +521,7 @@ void cmd_send(int argc, const char *const *argv)
     printf("done.\n");
 }
 
-void cmd_bank(int argc, const char *const *argv)
+static void cmd_bank(int argc, const char *const *argv)
 {
     if (argc > 1)
     {
@@ -546,7 +546,7 @@ void cmd_bank(int argc, const char *const *argv)
     printf("current rom bank: %d\n", config.cfg.rom_bank);
 }
 
-void cmd_load(int argc, const char *const *argv)
+static void cmd_load(int argc, const char *const *argv)
 {
     bool ret;
 
@@ -566,7 +566,7 @@ void cmd_load(int argc, const char *const *argv)
     }
 }
 
-void cmd_save(int argc, const char *const *argv)
+static void cmd_save(int argc, const char *const *argv)
 {
     bool ret;
     int32_t bank = config.cfg.rom_bank;
@@ -585,7 +585,7 @@ void cmd_save(int argc, const char *const *argv)
     }
 }
 
-void cmd_erase(int argc, const char *const *argv)
+static void cmd_erase(int argc, const char *const *argv)
 {
     bool ret;
     int32_t bank;
@@ -622,7 +622,7 @@ void cmd_erase(int argc, const char *const *argv)
     }
 }
 
-void cmd_clone(int argc, const char *const *argv)
+static void cmd_clone(int argc, const char *const *argv)
 {
     bool clone_ok = true;
     uint32_t wait_s = 5;
@@ -664,7 +664,7 @@ void cmd_clone(int argc, const char *const *argv)
     printf("clone: %s\n", clone_ok ? "OK" : "NG");
 }
 
-void cmd_help(int argc, const char *const *argv);
+static void cmd_help(int argc, const char *const *argv);
 
 typedef const struct
 {
@@ -758,7 +758,7 @@ static int mrl_execute(microrl_t *mrl, int argc, const char *const *argv)
     return 0;
 }
 
-char **mrl_complete(microrl_t *mrl, int argc, const char *const *argv)
+static char **mrl_complete(microrl_t *mrl, int argc, const char *const *argv)
 {
     int32_t j = 0;
 
@@ -787,7 +787,7 @@ char **mrl_complete(microrl_t *mrl, int argc, const char *const *argv)
     return complete_table;
 }
 
-void shell(void)
+static void shell(void)
 {
     microrl_t rl;
 
