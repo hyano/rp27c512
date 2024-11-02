@@ -475,6 +475,31 @@ void cmd_send(int argc, const char *const *argv)
     printf("done.\n");
 }
 
+void cmd_bank(int argc, const char *const *argv)
+{
+    if (argc > 1)
+    {
+        int32_t bank = -1;
+        char *end;
+        bank = strtol(argv[1], &end, 10);
+        if ((*end == '\0') && (bank >= 0) && (bank <= 3))
+        {
+            config.cfg.rom_bank = bank;
+            config_save_slow();
+
+            printf("current rom bank: %d\n", config.cfg.rom_bank);
+            return;
+        }
+        else
+        {
+            printf("error: illegal bank num\n");
+        }
+    }
+
+    printf("bank 0,1,2,3\n");
+    printf("current rom bank: %d\n", config.cfg.rom_bank);
+}
+
 void cmd_load(int argc, const char *const *argv)
 {
     bool ret;
@@ -505,31 +530,6 @@ void cmd_save(int argc, const char *const *argv)
     {
         printf("save: NG\n");
     }
-}
-
-void cmd_bank(int argc, const char *const *argv)
-{
-    if (argc > 1)
-    {
-        int32_t bank = -1;
-        char *end;
-        bank = strtol(argv[1], &end, 10);
-        if ((*end == '\0') && (bank >= 0) && (bank <= 3))
-        {
-            config.cfg.rom_bank = bank;
-            config_save_slow();
-
-            printf("current rom bank: %d\n", config.cfg.rom_bank);
-            return;
-        }
-        else
-        {
-            printf("error: illegal bank num\n");
-        }
-    }
-
-    printf("bank 0,1,2,3\n");
-    printf("current rom bank: %d\n", config.cfg.rom_bank);
 }
 
 void cmd_clone(int argc, const char *const *argv)
@@ -602,9 +602,9 @@ static const command_table_t command_table_emulator[] =
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
 
+    {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
-    {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
 
     {NULL, NULL}
 };
@@ -625,9 +625,9 @@ static const command_table_t command_table_clone[] =
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
 
+    {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
-    {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
 
     {"clone",   cmd_clone,      "clone from real ROM chip (clone wait verify_num)"},
 
