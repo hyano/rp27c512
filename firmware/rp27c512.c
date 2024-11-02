@@ -59,7 +59,7 @@
 #define REBOOT_DELAY_MS (250)
 #define FLASH_WAIT_MS (500)
 
-extern const uint8_t cm32p_rom[];
+
 static uint8_t rom[0x10000] __attribute__((aligned(0x10000))) = {0};
 static uint8_t ram[0x10000] __attribute__((aligned(0x10000))) = {0};
 static uint8_t *device = rom;
