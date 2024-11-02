@@ -168,7 +168,7 @@ static bool config_save_slow(void)
 
 static bool rom_load(int32_t bank)
 {
-    memcpy(device, flash_target_contents_rom[bank], sizeof(rom));
+    memcpy(rom, flash_target_contents_rom[bank], sizeof(rom));
     return true;
 }
 
@@ -190,11 +190,11 @@ static bool rom_save(int32_t bank)
     uint32_t ints = save_and_disable_interrupts();
     multicore_lockout_start_blocking();
     flash_range_erase(FLASH_TARGET_OFFSET_ROM[bank], sizeof(rom));
-    flash_range_program(FLASH_TARGET_OFFSET_ROM[bank], device, sizeof(rom));
+    flash_range_program(FLASH_TARGET_OFFSET_ROM[bank], rom, sizeof(rom));
     multicore_lockout_end_blocking();
     restore_interrupts(ints);
 
-    return memcmp(flash_target_contents_rom[bank], device, sizeof(rom)) == 0;
+    return memcmp(flash_target_contents_rom[bank], rom, sizeof(rom)) == 0;
 }
 
 static bool rom_save_slow(int32_t bank)
