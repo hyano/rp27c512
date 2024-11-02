@@ -61,8 +61,8 @@
 #define FLASH_WAIT_MS (500)
 
 
-static uint8_t rom[0x10000] __attribute__((aligned(0x10000))) = {0};
-static uint8_t ram[0x10000] __attribute__((aligned(0x10000))) = {0};
+static uint8_t __uninitialized_ram(rom[0x10000]) __attribute__((aligned(0x10000)));
+static uint8_t __uninitialized_ram(ram[0x10000]) __attribute__((aligned(0x10000)));
 static uint8_t *device = rom;
 
 static uint8_t init_rom_data[FLASH_PAGE_SIZE];
