@@ -64,6 +64,8 @@ static uint8_t rom[0x10000] __attribute__((aligned(0x10000))) = {0};
 static uint8_t ram[0x10000] __attribute__((aligned(0x10000))) = {0};
 static uint8_t *device = rom;
 
+static uint8_t init_rom_data[FLASH_PAGE_SIZE];
+
 #define CAPTURE_COUNT 8192
 static uint32_t capture_buffer[CAPTURE_COUNT];
 static volatile uint32_t capture_wp = 0;
@@ -204,6 +206,50 @@ static bool rom_save_slow(int32_t bank)
     set_sys_clock_khz(CPU_CLOCK_FREQ_NORMAL, true);
     sleep_ms(FLASH_WAIT_MS);
     ret = rom_save(bank);
+    sleep_ms(FLASH_WAIT_MS);
+    set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
+
+    return ret;
+}
+
+static bool rom_erase(int32_t bank)
+{
+    bool ret = true;
+    memset(init_rom_data, 0xff, sizeof(init_rom_data));
+
+    uint32_t ints = save_and_disable_interrupts();
+    multicore_lockout_start_blocking();
+    for (int32_t s = 0; s < sizeof(rom) / FLASH_SECTOR_SIZE; s++)
+    {
+        flash_range_erase(FLASH_TARGET_OFFSET_ROM[bank] + FLASH_SECTOR_SIZE * s, sizeof(rom));
+        for (int32_t p = 0; p < FLASH_SECTOR_SIZE / sizeof(init_rom_data); p++)
+        {
+            flash_range_program(
+                FLASH_TARGET_OFFSET_ROM[bank] + FLASH_SECTOR_SIZE * s + sizeof(init_rom_data) * p,
+                init_rom_data,
+                sizeof(init_rom_data));
+            if (memcmp(
+                flash_target_contents_rom[bank] + FLASH_SECTOR_SIZE * s + sizeof(init_rom_data) * p,
+                init_rom_data,
+                sizeof(init_rom_data)) != 0)
+            {
+                ret = false;
+            }
+        }
+    }
+    multicore_lockout_end_blocking();
+    restore_interrupts(ints);
+
+    return ret;
+}
+
+static bool rom_erase_slow(int32_t bank)
+{
+    bool ret;
+
+    set_sys_clock_khz(CPU_CLOCK_FREQ_NORMAL, true);
+    sleep_ms(FLASH_WAIT_MS);
+    ret = rom_erase(bank);
     sleep_ms(FLASH_WAIT_MS);
     set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
@@ -504,7 +550,11 @@ void cmd_load(int argc, const char *const *argv)
 {
     bool ret;
 
-    ret = rom_load_slow(config.cfg.rom_bank);
+    int32_t bank = config.cfg.rom_bank;
+
+    printf("load rom bank %d ... ", bank);
+    ret = rom_load_slow(bank);
+    printf("done.\n");
 
     if (ret)
     {
@@ -519,8 +569,11 @@ void cmd_load(int argc, const char *const *argv)
 void cmd_save(int argc, const char *const *argv)
 {
     bool ret;
+    int32_t bank = config.cfg.rom_bank;
 
-    ret = rom_save_slow(config.cfg.rom_bank);
+    printf("save rom bank %d ... ", bank);
+    ret = rom_save_slow(bank);
+    printf("done.\n");
 
     if (ret)
     {
@@ -529,6 +582,43 @@ void cmd_save(int argc, const char *const *argv)
     else
     {
         printf("save: NG\n");
+    }
+}
+
+void cmd_erase(int argc, const char *const *argv)
+{
+    bool ret;
+    int32_t bank;
+
+    if (argc > 1)
+    {
+        char *end;
+        bank = strtol(argv[1], &end, 10);
+        if ((*end != '\0') || !((bank >= 0) && (bank <= 3)))
+        {
+            printf("error: illegal bank num\n");
+            return;
+        }
+    }
+    else
+    {
+        // for safety
+        //bank = config.cfg.rom_bank;
+        printf("erase 0,1,2,3\n");
+        return;
+    }
+
+    printf("erase rom bank %d ... ", bank);
+    ret = rom_erase_slow(bank);
+    printf("done.\n");
+
+    if (ret)
+    {
+        printf("erase: OK\n");
+    }
+    else
+    {
+        printf("erase: NG\n");
     }
 }
 
@@ -605,6 +695,7 @@ static const command_table_t command_table_emulator[] =
     {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
+    {"erase",   cmd_erase,      "erase flash rom bank"},
 
     {NULL, NULL}
 };
@@ -628,6 +719,7 @@ static const command_table_t command_table_clone[] =
     {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
+    {"erase",   cmd_erase,      "erase flash rom bank"},
 
     {"clone",   cmd_clone,      "clone from real ROM chip (clone wait verify_num)"},
 
