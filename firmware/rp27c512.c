@@ -824,7 +824,7 @@ static const command_table_t command_table_emulator[] =
     {"save",    cmd_save,       "save data to current flash rom bank"},
     {"erase",   cmd_erase,      "erase flash rom bank"},
 
-    {"init",    cmd_init,       "iniliazie rom/config (init all|rom|config)"},
+    {"init",    cmd_init,       "initialize rom/config (init all|rom|config)"},
 
     {NULL, NULL}
 };
@@ -852,7 +852,7 @@ static const command_table_t command_table_clone[] =
 
     {"clone",   cmd_clone,      "clone from real ROM chip (clone wait verify_num)"},
 
-    {"init",    cmd_init,       "iniliazie rom/config (init all|rom|config)"},
+    {"init",    cmd_init,       "initialize rom/config (init all|rom|config)"},
 
     {NULL, NULL}
 };
