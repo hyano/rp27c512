@@ -27,6 +27,7 @@
 #include "busmon.h"
 #include "romemu.h"
 
+// #define DEBUG_PULL_UP
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
@@ -34,7 +35,6 @@
 #define MAGIC_STR "RP27C512 VER1.00"
 #define MAGIC_SIZE (16)
 
-// #define PULL_UP
 #define GPIO_ADDR 0
 #define GPIO_ADDR_END 16
 #define GPIO_DATA 16 // 0-7
@@ -52,6 +52,9 @@
 #define GPIO_DATA_MASK (((1 << (GPIO_DATA_END - GPIO_DATA)) - 1) << GPIO_DATA)
 #define GPIO_CS_MASK (1 << GPIO_CS)
 #define GPIO_OE_MASK (1 << GPIO_OE)
+#define GPIO_EXT0_MASK (1 << GPIO_EXT0)
+#define GPIO_EXT1_MASK (1 << GPIO_EXT1)
+#define GPIO_EXT2_MASK (1 << GPIO_EXT2)
 
 #define GPIO_GET_DATA(v) (((v) & GPIO_DATA_MASK) >> GPIO_DATA)
 
@@ -966,7 +969,7 @@ int main(void)
     // Overclocking
     set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
-#ifdef PULL_UP
+#ifdef DEBUG_PULL_UP
     {
         // for debugging with logic analyzer
         for (uint pin = GPIO_ADDR; pin < GPIO_ADDR_END; pin++)
