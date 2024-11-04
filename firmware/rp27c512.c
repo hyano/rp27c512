@@ -880,11 +880,11 @@ int main(void)
 
     // vreg_set_voltage(VREG_VOLTAGE_1_10); // VREG_VOLTAGE_DEFAULT
     // vreg_set_voltage(VREG_VOLTAGE_1_25);
-    //vreg_set_voltage(VREG_VOLTAGE_MAX); // 1_30
+    vreg_set_voltage(VREG_VOLTAGE_MAX); // 1_30
     // set_sys_clock_khz(250000, true);
     // set_sys_clock_khz(320000, true);
     // set_sys_clock_khz(400000, true);
-    //set_sys_clock_khz(CPU_CLOCK_FREQ_NORMAL, true);
+    set_sys_clock_khz(CPU_CLOCK_FREQ_NORMAL, true);
 
     gpio_init_mask(GPIO_ALL_MASK);
     stdio_init_all();
@@ -903,7 +903,7 @@ int main(void)
         rom_load_async_wait(ch);
     }
 
-    //set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
+    set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
 #ifdef PULL_UP
     {
