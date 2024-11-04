@@ -648,6 +648,17 @@ static void cmd_save(int argc, const char *const *argv)
     }
 }
 
+static bool erase_rom_bank(int32_t bank)
+{
+    bool ret;
+
+    printf("erase rom bank %d ... ", bank);
+    ret = rom_erase_slow(bank);
+    printf("done.\n");
+
+    return ret;
+}
+
 static void cmd_erase(int argc, const char *const *argv)
 {
     bool ret;
@@ -671,9 +682,7 @@ static void cmd_erase(int argc, const char *const *argv)
         return;
     }
 
-    printf("erase rom bank %d ... ", bank);
-    ret = rom_erase_slow(bank);
-    printf("done.\n");
+    ret = erase_rom_bank(bank);
 
     if (ret)
     {
@@ -727,6 +736,58 @@ static void cmd_clone(int argc, const char *const *argv)
     printf("clone: %s\n", clone_ok ? "OK" : "NG");
 }
 
+static void cmd_init(int argc, const char *const *argv)
+{
+    bool init_config = false;
+    bool init_rom = false;
+
+    if (argc > 1)
+    {
+        do
+        {
+            if (strcmp(argv[1], "all") == 0)
+            {
+                init_config = true;
+                init_rom = true;
+            }
+            else if (strcmp(argv[1], "rom") == 0)
+            {
+                init_rom = true;
+            }
+            else if (strcmp(argv[1], "config") == 0)
+            {
+                init_config = true;
+            }
+            else
+            {
+                printf("error: illegal parameter\n");
+                break;
+            }
+
+            if (init_rom)
+            {
+                printf("erase all flash rom banks\n");
+                for (int32_t bank = 0; bank < ROM_BANK_NUM; bank++)
+                {
+                    erase_rom_bank(bank);
+                }
+            }
+            if (init_config)
+            {
+                printf("initialize configuration\n");
+                config_init();
+                config_save();
+
+                reboot(REBOOT_DELAY_MS);
+            }
+            return;
+        }
+        while (false);
+    }
+
+    printf("init all|rom|config\n");
+}
+
 static void cmd_help(int argc, const char *const *argv);
 
 typedef const struct
@@ -760,6 +821,8 @@ static const command_table_t command_table_emulator[] =
     {"save",    cmd_save,       "save data to current flash rom bank"},
     {"erase",   cmd_erase,      "erase flash rom bank"},
 
+    {"init",    cmd_init,       "iniliazie rom/config (init all|rom|config)"},
+
     {NULL, NULL}
 };
 
@@ -785,6 +848,8 @@ static const command_table_t command_table_clone[] =
     {"erase",   cmd_erase,      "erase flash rom bank"},
 
     {"clone",   cmd_clone,      "clone from real ROM chip (clone wait verify_num)"},
+
+    {"init",    cmd_init,       "iniliazie rom/config (init all|rom|config)"},
 
     {NULL, NULL}
 };
