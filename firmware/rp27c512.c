@@ -903,6 +903,7 @@ int main(void)
         rom_load_async_wait(ch);
     }
 
+    // Overclocking
     set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
 #ifdef PULL_UP
@@ -944,6 +945,7 @@ int main(void)
         romemu_init(pio0, 0, rom);
         busmon_init(pio1, 0, ram);
 
+        command_table = command_table_emulator;
         multicore_launch_core1(core1_entry_emulator);
     }
     else if (config.cfg.mode == CONFIG_MODE_CLONE)
@@ -964,6 +966,7 @@ int main(void)
         gpio_pull_up(GPIO_OE);
         gpio_set_drive_strength(GPIO_OE, GPIO_DRIVE_STRENGTH_12MA);
 
+        command_table = command_table_clone;
         multicore_launch_core1(core1_entry_clone);
     }
 
@@ -979,11 +982,9 @@ int main(void)
     {
     case CONFIG_MODE_EMULATOR:
         printf("mode: emulator\n");
-        command_table = command_table_emulator;
         break;
     case CONFIG_MODE_CLONE:
         printf("mode: clone\n");
-        command_table = command_table_clone;
         break;
     default:
         printf("mode: unknown (%d)\n", config.cfg.mode);
