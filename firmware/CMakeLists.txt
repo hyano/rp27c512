@@ -23,13 +23,14 @@ add_executable(rp27c512
   microrl-remaster/src/microrl/microrl.c
 )
 
-pico_generate_pio_header(rp27c512 ${CMAKE_CURRENT_SOURCE_DIR}/romemu.pio)
-pico_generate_pio_header(rp27c512 ${CMAKE_CURRENT_SOURCE_DIR}/busmon.pio)
-
 pico_set_binary_type(rp27c512 copy_to_ram)
 pico_set_linker_script(rp27c512 ${CMAKE_CURRENT_LIST_DIR}/rp27c512_copy_to_ram.ld)
+
 pico_enable_stdio_usb(rp27c512 1)
 pico_enable_stdio_uart(rp27c512 0)
+
+pico_generate_pio_header(rp27c512 ${CMAKE_CURRENT_SOURCE_DIR}/romemu.pio)
+pico_generate_pio_header(rp27c512 ${CMAKE_CURRENT_SOURCE_DIR}/busmon.pio)
 
 pico_add_extra_outputs(rp27c512)
 
