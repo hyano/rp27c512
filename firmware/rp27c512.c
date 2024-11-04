@@ -354,13 +354,6 @@ static void read_rom(uint8_t *dst, uint32_t start, uint32_t end)
     gpio_put_all(bit(GPIO_CS) | bit(GPIO_OE));
 }
 
-static bool clone(void)
-{
-    read_rom(rom, 0x0000, 0x10000);
-    read_rom(ram, 0x0000, 0x10000);
-    return memcmp(rom, ram, sizeof(rom)) == 0;
-}
-
 static void core1_entry_emulator(void)
 {
     uint32_t cap;
