@@ -22,6 +22,7 @@
 
 #include "microrl.h"
 #include "xmodem.h"
+#include "section.h"
 
 #include "busmon.h"
 #include "romemu.h"
@@ -61,14 +62,14 @@
 #define FLASH_WAIT_MS (500)
 
 
-static uint8_t __uninitialized_ram(rom[0x10000]) __attribute__((aligned(0x10000)));
-static uint8_t __uninitialized_ram(ram[0x10000]) __attribute__((aligned(0x10000)));
+static uint8_t __memimage(rom[0x10000]) __attribute__((aligned(0x10000)));;
+static uint8_t __memimage(ram[0x10000]) __attribute__((aligned(0x10000)));;
 static uint8_t *device = rom;
 
-static uint8_t init_rom_data[FLASH_PAGE_SIZE];
+static uint8_t __noinit(init_rom_data[FLASH_PAGE_SIZE]);
 
 #define CAPTURE_COUNT 8192
-static uint32_t capture_buffer[CAPTURE_COUNT];
+static uint32_t __noinit(capture_buffer[CAPTURE_COUNT]);
 static volatile uint32_t capture_wp = 0;
 static uint32_t capture_rp = 0;
 static bool capture_target_bank[0x100];
@@ -108,11 +109,13 @@ typedef struct
     int32_t         rom_bank;
 } config_t;
 
-static union
+typedef union
 {
     config_t cfg;
     uint8_t bin[FLASH_PAGE_SIZE];
-} config;
+} config_u;
+
+config_u __noinit(config);
 
 static inline uint32_t bit(uint32_t bn)
 {
@@ -877,11 +880,11 @@ int main(void)
 
     // vreg_set_voltage(VREG_VOLTAGE_1_10); // VREG_VOLTAGE_DEFAULT
     // vreg_set_voltage(VREG_VOLTAGE_1_25);
-    vreg_set_voltage(VREG_VOLTAGE_MAX); // 1_30
+    //vreg_set_voltage(VREG_VOLTAGE_MAX); // 1_30
     // set_sys_clock_khz(250000, true);
     // set_sys_clock_khz(320000, true);
     // set_sys_clock_khz(400000, true);
-    set_sys_clock_khz(CPU_CLOCK_FREQ_NORMAL, true);
+    //set_sys_clock_khz(CPU_CLOCK_FREQ_NORMAL, true);
 
     gpio_init_mask(GPIO_ALL_MASK);
     stdio_init_all();
@@ -900,7 +903,7 @@ int main(void)
         rom_load_async_wait(ch);
     }
 
-    set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
+    //set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
 #ifdef PULL_UP
     {

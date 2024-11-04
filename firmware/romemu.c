@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "hardware/pio.h"
 #include "hardware/dma.h"
+#include "section.h"
 
 #include "romemu.pio.h"
 

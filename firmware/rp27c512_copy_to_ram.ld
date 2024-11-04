@@ -24,7 +24,8 @@
 MEMORY
 {
     INCLUDE "pico_flash_region.ld"
-    RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 256k
+    RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 128k
+    MEMIMAGE(rwx) : ORIGIN =  0x20020000, LENGTH = 128k
     SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
     SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k
 }
@@ -209,6 +210,10 @@ SECTIONS
         __bss_end__ = .;
     } > RAM
 
+    .noinit (NOLOAD): {
+        *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.noinit*)))
+    } > RAM
+
     .heap (NOLOAD):
     {
         __end__ = .;
@@ -219,6 +224,12 @@ SECTIONS
         . = ORIGIN(RAM) + LENGTH(RAM);
         __HeapLimit = .;
     } > RAM
+
+    .memimage (NOLOAD): {
+        __MemImageTop = .;
+        *(.memimage*)
+        __MemImageBottom = .;
+    } > MEMIMAGE
 
     /* Start and end symbols must be word-aligned */
     .scratch_x : {
@@ -261,7 +272,7 @@ SECTIONS
     } > FLASH
 
     /* stack limit is poorly named, but historically is maximum heap ptr */
-    __StackLimit = ORIGIN(RAM) + LENGTH(RAM);
+    __StackLimit = ORIGIN(SCRATCH_X);
     __StackOneTop = ORIGIN(SCRATCH_X) + LENGTH(SCRATCH_X);
     __StackTop = ORIGIN(SCRATCH_Y) + LENGTH(SCRATCH_Y);
     __StackOneBottom = __StackOneTop - SIZEOF(.stack1_dummy);
@@ -281,6 +292,10 @@ SECTIONS
 
     /* Check if data + heap + stack exceeds RAM limit */
     ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed")
+
+    /* Check if data + heap + memimage + stack exceeds RAM limit */
+    ASSERT(__MemImageTop >= __HeapLimit, "region RAM overflowed")
+    ASSERT(__StackLimit >= __MemImageBottom, "region MEMIMAGE overflowed")
 
     ASSERT( __binary_info_header_end - __logical_binary_start <= 256, "Binary info must be in first 256 bytes of the binary")
     /* todo assert on extra code */

@@ -7,10 +7,11 @@
 #include <stdint.h>
 #include "hardware/pio.h"
 #include "hardware/dma.h"
+#include "section.h"
 
 #include "busmon.pio.h"
 
-static uint8_t busmon_wr_value_table[0x100] __attribute__ ((aligned (0x100)));
+static uint8_t __noinit(busmon_wr_value_table[0x100]) __attribute__ ((aligned (0x100)));
 
 static void busmon_wr_init(PIO pio, uint sm, uint offset, uint pin, uint8_t *ram)
 {
@@ -36,7 +37,7 @@ static void busmon_wr_init(PIO pio, uint sm, uint offset, uint pin, uint8_t *ram
 
 #define BUSMON_CAP_BUFFER_SHIFT (6)
 #define BUSMON_CAP_BUFFER_COUNT  (1 << BUSMON_CAP_BUFFER_SHIFT)
-static uint32_t busmon_cap_buffer[BUSMON_CAP_BUFFER_COUNT] __attribute__ ((aligned (sizeof(uint32_t) * BUSMON_CAP_BUFFER_COUNT)));
+static uint32_t __noinit(busmon_cap_buffer[BUSMON_CAP_BUFFER_COUNT]) __attribute__ ((aligned (sizeof(uint32_t) * BUSMON_CAP_BUFFER_COUNT)));
 static uint32_t busmon_cap_buffer_count = BUSMON_CAP_BUFFER_COUNT;
 static int busmon_cap_dma_ch = 0;
 static volatile uint32_t *busmon_cap_buffer_wp_ptr = NULL;
