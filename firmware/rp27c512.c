@@ -56,10 +56,12 @@
 #define GPIO_GET_DATA(v) (((v) & GPIO_DATA_MASK) >> GPIO_DATA)
 
 
-#define CPU_CLOCK_FREQ_HIGH (400 * 1000)
-#define CPU_CLOCK_FREQ_NORMAL (250 * 1000)
-#define REBOOT_DELAY_MS (250)
-#define FLASH_WAIT_MS (500)
+#define CPU_CLOCK_FREQ_HIGH         (400 * 1000)
+#define CPU_CLOCK_FREQ_NORMAL       (250 * 1000)
+#define REBOOT_DELAY_MS             (250)
+#define FLASH_WAIT_MS               (500)
+#define DEFAULT_CLONE_WAIT_S        (5)
+#define DEFAULT_CLONE_VERIFY_NUM    (2)
 
 
 static uint8_t __memimage(rom[0x10000]) __attribute__((aligned(0x10000)));;
@@ -693,8 +695,8 @@ static void cmd_erase(int argc, const char *const *argv)
 static void cmd_clone(int argc, const char *const *argv)
 {
     bool clone_ok = true;
-    uint32_t wait_s = 5;
-    int32_t verify_num = 2;
+    uint32_t wait_s = DEFAULT_CLONE_WAIT_S;
+    int32_t verify_num = DEFAULT_CLONE_VERIFY_NUM;
 
     if (argc > 1)
     {
