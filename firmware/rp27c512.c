@@ -176,6 +176,16 @@ static bool config_save(void)
     return memcmp(flash_target_contents_config, config.bin, sizeof(config)) == 0;
 }
 
+static bool config_save_init(void)
+{
+    uint32_t ints = save_and_disable_interrupts();
+    flash_range_erase(FLASH_TARGET_OFFSET_CONFIG, FLASH_SECTOR_SIZE);
+    flash_range_program(FLASH_TARGET_OFFSET_CONFIG, config.bin, sizeof(config));
+    restore_interrupts(ints);
+
+    return memcmp(flash_target_contents_config, config.bin, sizeof(config)) == 0;
+}
+
 static bool config_save_slow(void)
 {
     bool ret;
@@ -957,7 +967,7 @@ int main(void)
     {
         printf("configration is broken. initialize.\n");
         config_init();
-        config_save();
+        config_save_init();
     }
 
     {
