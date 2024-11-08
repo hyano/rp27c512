@@ -639,7 +639,7 @@ static void cmd_bank(int argc, const char *const *argv)
         }
     }
 
-    printf("bank 0,1,2,3\n");
+    printf("bank 0|1|2|3\n");
     printf("current rom bank: %d\n", config.cfg.rom_bank);
 }
 
