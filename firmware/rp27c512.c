@@ -557,13 +557,31 @@ static void cmd_dump_len(int argc, const char *const *argv)
         len = strtol(argv[1], NULL, 10);
         if (len > 0)
         {
-            config.cfg.dump_line_count = len;
-            config_save_slow();
+            if (argc > 2)
+            {
+                if (strcmp(argv[2], "save") == 0)
+                {
+                    config.cfg.dump_line_count = len;
+                    config_save_slow();
+                }
+                else
+                {
+                    printf("error: illegal save option\n");
+                }
+            }
+            else
+            {
+                config.cfg.dump_line_count = len;
+            }
         }
         else
         {
             printf("error: illegal dump line count\n");
         }
+    }
+    else
+    {
+        printf("dlen len [save]\n");
     }
     printf("current dump line count: %d\n", config.cfg.dump_line_count);
 }
