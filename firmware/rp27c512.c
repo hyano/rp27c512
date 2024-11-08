@@ -65,7 +65,7 @@
 #define FLASH_WAIT_MS               (500)
 #define DEFAULT_CLONE_WAIT_S        (5)
 #define DEFAULT_CLONE_VERIFY_NUM    (2)
-
+#define DEFAULT_DUMP_LINE_COUNT     (16)
 
 static uint8_t __memimage(rom[0x10000]) __attribute__((aligned(0x10000)));;
 static uint8_t __memimage(ram[0x10000]) __attribute__((aligned(0x10000)));;
@@ -112,6 +112,7 @@ typedef struct
     char            magic[MAGIC_SIZE];
     config_mode_e   mode;
     int32_t         rom_bank;
+    int32_t         dump_line_count;
 } config_t;
 
 typedef union
@@ -139,6 +140,7 @@ static void config_init(void)
     memcpy(config.cfg.magic, MAGIC_STR, MAGIC_SIZE);
     config.cfg.mode = CONFIG_MODE_EMULATOR;
     config.cfg.rom_bank = 0;
+    config.cfg.dump_line_count = DEFAULT_DUMP_LINE_COUNT;
 }
 
 static bool config_is_valid(void)
@@ -405,9 +407,9 @@ static void core1_entry_clone(void)
     }
 }
 
-static void memdump(const uint8_t *mem, uint32_t addr)
+static void memdump(const uint8_t *mem, uint32_t addr, int32_t count)
 {
-    for (int y = 0; y < 16; y++)
+    for (int y = 0; y < count; y++)
     {
         printf("%04x ", addr);
         for (int x = 0; x < 16; x++)
@@ -527,7 +529,7 @@ static void cmd_dump(int argc, const char *const *argv)
     {
         addr = strtol(argv[1], NULL, 16);
     }
-    memdump(device, addr);
+    memdump(device, addr, config.cfg.dump_line_count);
     addr += 0x100;
 }
 
@@ -542,9 +544,28 @@ static void cmd_dump_watch(int argc, const char *const *argv)
     while (getchar_timeout_us(0) == PICO_ERROR_TIMEOUT)
     {
         printf("\x1b[0;0H");
-        memdump(device, addr);
+        memdump(device, addr, config.cfg.dump_line_count);
     }
     addr += 0x100;
+}
+
+static void cmd_dump_len(int argc, const char *const *argv)
+{
+    static int32_t len = 0;
+    if (argc > 1)
+    {
+        len = strtol(argv[1], NULL, 10);
+        if (len > 0)
+        {
+            config.cfg.dump_line_count = len;
+            config_save_slow();
+        }
+        else
+        {
+            printf("error: illegal dump line count\n");
+        }
+    }
+    printf("current dump line count: %d\n", config.cfg.dump_line_count);
 }
 
 static void cmd_capture(int argc, const char *const *argv)
@@ -824,6 +845,7 @@ static const command_table_t command_table_emulator[] =
     {"device",  cmd_device,     "select device (device rom|ram)"},
     {"d",       cmd_dump,       "dump device (d address)"},
     {"dw",      cmd_dump_watch, "dump device repeatly (dw address)"},
+    {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
     {"cap",     cmd_capture,    "show capture log"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
@@ -851,6 +873,7 @@ static const command_table_t command_table_clone[] =
     {"gpio",    cmd_gpio,       "show GPIO status"},
 
     {"d",       cmd_dump,       "dump device (d address)"},
+    {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
