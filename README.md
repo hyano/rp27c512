@@ -41,6 +41,8 @@
       で良いでしょう。
   * [丸ピンIC用連結ソケット 1×14 MH-1X14-L2](https://akizukidenshi.com/catalog/g/g116982/)
     * 秋葉原の店舗には常備していないようなので要注意です。
+    * [丸ピンIC用連結ソケット 両端オスピン・1列14P](https://akizukidenshi.com/catalog/g/g100862/)のピンを切断して使っても、
+      [細ピンヘッダー 1×40 (黒)](https://akizukidenshi.com/catalog/g/g106631/)を使ってもよいでしょう。
   * [ピンヘッダー (オスL型) 1×40 (40P)](https://akizukidenshi.com/catalog/g/g101627/)
   * [ショットキーバリアダイオード 45V2A SBM245L](https://akizukidenshi.com/catalog/g/g117439/)
 * 子基板(cloneモード用)
