@@ -537,6 +537,7 @@ static void cmd_dump_watch(int argc, const char *const *argv)
 {
     static uint32_t addr = 0;
     printf("\x1b[2J");
+    printf("\x1b[?25l"); // cursor off
     if (argc > 1)
     {
         addr = strtol(argv[1], NULL, 16);
@@ -547,6 +548,7 @@ static void cmd_dump_watch(int argc, const char *const *argv)
         memdump(device, addr, config.cfg.dump_line_count);
     }
     addr += 0x100;
+    printf("\x1b[?25h"); // cursor on
 }
 
 static void cmd_dump_len(int argc, const char *const *argv)
