@@ -37,7 +37,7 @@ pico_add_extra_outputs(rp27c512)
 add_subdirectory(xmodem)
 
 target_include_directories(rp27c512 PRIVATE . ./microrl-remaster/src/include/microrl)
-target_link_libraries(rp27c512 pico_stdlib pico_multicore hardware_pio hardware_dma hardware_flash hardware_sync hardware_watchdog xmodem)
+target_link_libraries(rp27c512 pico_stdlib pico_multicore pico_bootrom hardware_pio hardware_dma hardware_flash hardware_sync hardware_watchdog xmodem)
 
 #pico_define_boot_stage2(slower_boot2 ${PICO_DEFAULT_BOOT_STAGE2_FILE})
 #target_compile_definitions(slower_boot2 PRIVATE PICO_FLASH_SPI_CLKDIV=4)

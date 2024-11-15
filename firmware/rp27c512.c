@@ -12,6 +12,7 @@
 #include "hardware/vreg.h"
 #include "hardware/watchdog.h"
 #include "pico/multicore.h"
+#include "pico/bootrom.h"
 #include "pico/stdlib.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -485,12 +486,17 @@ static void cmd_mode(int argc, const char *const *argv)
             reboot(REBOOT_DELAY_MS);
             return;
         }
+        else if (strcmp(argv[1], "bootsel") == 0)
+        {
+            reset_usb_boot(0, 0);
+            return;
+        }
         else
         {
             printf("error: unknown mode.\n");
         }
     }
-    printf("mode emulator|clone\n");
+    printf("mode emulator|clone|bootsel\n");
     switch (config.cfg.mode)
     {
     case CONFIG_MODE_EMULATOR:
