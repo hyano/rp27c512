@@ -67,6 +67,9 @@
 #define DEFAULT_CLONE_VERIFY_NUM    (2)
 #define DEFAULT_DUMP_LINE_COUNT     (16)
 
+#define CONFIG_ERASE_SIZE           (FLASH_SECTOR_SIZE * 3)
+#define CONFIG_WRITE_SIZE           (FLASH_PAGE_SIZE * (1 + 32))
+
 static uint8_t __memimage(rom[0x10000]) __attribute__((aligned(0x10000)));;
 static uint8_t __memimage(ram[0x10000]) __attribute__((aligned(0x10000)));;
 static uint8_t *device = rom;
@@ -77,7 +80,7 @@ static uint8_t __noinit(init_rom_data[FLASH_PAGE_SIZE]);
 static uint32_t __noinit(capture_buffer[CAPTURE_COUNT]);
 static volatile uint32_t capture_wp = 0;
 static uint32_t capture_rp = 0;
-static bool capture_target_bank[0x100];
+static uint8_t __noinit(capture_target[0x10000 / 8]);
 
 #define CONFIG_BANK_BLOCK (31)
 static const uint32_t FLASH_TARGET_OFFSET_CONFIG = (CONFIG_BANK_BLOCK * 0x10000);
@@ -113,12 +116,13 @@ typedef struct
     config_mode_e   mode;
     int32_t         rom_bank;
     int32_t         dump_line_count;
+    uint8_t         capture_target[0x10000 / 8];
 } config_t;
 
 typedef union
 {
     config_t cfg;
-    uint8_t bin[FLASH_PAGE_SIZE];
+    uint8_t bin[CONFIG_WRITE_SIZE];
 } config_u;
 
 config_u __noinit(config);
@@ -170,7 +174,7 @@ static bool config_save(void)
 {
     uint32_t ints = save_and_disable_interrupts();
     multicore_lockout_start_blocking();
-    flash_range_erase(FLASH_TARGET_OFFSET_CONFIG, FLASH_SECTOR_SIZE);
+    flash_range_erase(FLASH_TARGET_OFFSET_CONFIG, CONFIG_ERASE_SIZE);
     flash_range_program(FLASH_TARGET_OFFSET_CONFIG, config.bin, sizeof(config));
     multicore_lockout_end_blocking();
     restore_interrupts(ints);
@@ -181,7 +185,7 @@ static bool config_save(void)
 static bool config_save_init(void)
 {
     uint32_t ints = save_and_disable_interrupts();
-    flash_range_erase(FLASH_TARGET_OFFSET_CONFIG, FLASH_SECTOR_SIZE);
+    flash_range_erase(FLASH_TARGET_OFFSET_CONFIG, CONFIG_ERASE_SIZE);
     flash_range_program(FLASH_TARGET_OFFSET_CONFIG, config.bin, sizeof(config));
     restore_interrupts(ints);
 
@@ -341,6 +345,28 @@ static bool rom_erase_slow(int32_t bank)
     return ret;
 }
 
+
+static void capture_target_enable(uint32_t start, uint32_t end)
+{
+    for (uint32_t addr = start; addr <= end; addr++)
+    {
+        capture_target[addr / 8] |= (1 << (addr % 8));
+    }
+}
+
+static void capture_target_disable(uint32_t start, uint32_t end)
+{
+    for (uint32_t addr = start; addr <= end; addr++)
+    {
+        capture_target[addr / 8] &= ~(1 << (addr % 8));
+    }
+}
+
+static inline bool capture_is_target(uint32_t addr)
+{
+    return (capture_target[addr / 8] & (1 << (addr % 8))) != 0;
+}
+
 static void reboot(uint32_t delay_ms)
 {
     printf("rebooting...\n\n");
@@ -375,7 +401,6 @@ static void core1_entry_emulator(void)
     uint32_t rw = 3;
     uint32_t rw_prev;
     uint32_t addr;
-    uint32_t data;
 
     multicore_lockout_victim_init();
 
@@ -386,7 +411,7 @@ static void core1_entry_emulator(void)
         {
             cap = busmon_cap_pop();
             addr = cap & 0x00ffff;
-            if (capture_target_bank[addr >> 8])
+            if (capture_is_target(addr))
             {
                 capture_buffer[capture_wp] = cap;
                 capture_wp = (capture_wp + 1) % CAPTURE_COUNT;
@@ -588,6 +613,38 @@ static void cmd_dump_len(int argc, const char *const *argv)
     printf("current dump line count: %d\n", config.cfg.dump_line_count);
 }
 
+static void cmd_watch(int argc, const char *const *argv)
+{
+    if (argc > 2)
+    {
+        uint32_t start, end;
+        start = strtol(argv[1], NULL, 16);
+        end = strtol(argv[2], NULL, 16);
+        printf("set capture area %04x %04x\n", start, end);
+        capture_target_enable(start, end);
+    }
+    else
+    {
+        printf("watch start end\n");
+    }
+}
+
+static void cmd_unwatch(int argc, const char *const *argv)
+{
+    if (argc > 2)
+    {
+        uint32_t start, end;
+        start = strtol(argv[1], NULL, 16);
+        end = strtol(argv[2], NULL, 16);
+        printf("unset capture area %04x %04x\n", start, end);
+        capture_target_disable(start, end);
+    }
+    else
+    {
+        printf("unwatch start end\n");
+    }
+}
+
 static void cmd_capture(int argc, const char *const *argv)
 {
     uint32_t cap;
@@ -610,6 +667,14 @@ static void cmd_capture(int argc, const char *const *argv)
             printf("%c:%04x:%02x\n", str_rw[rw], addr, data);
         }
     }
+}
+
+static void cmd_save_watch(int argc, const char *const *argv)
+{
+    printf("save capture area ... ");
+    memcpy(config.cfg.capture_target, capture_target, sizeof(capture_target));
+    config_save_slow();
+    printf("done.\n");
 }
 
 int _inbyte(unsigned short timeout)
@@ -866,7 +931,12 @@ static const command_table_t command_table_emulator[] =
     {"d",       cmd_dump,       "dump device (d address)"},
     {"dw",      cmd_dump_watch, "dump device repeatly (dw address)"},
     {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
+
+
+    {"watch",   cmd_watch,      "set capture area"},
+    {"unwatch", cmd_unwatch,    "unset capture area"},
     {"cap",     cmd_capture,    "show capture log"},
+    {"wsave",   cmd_save_watch, "save capture area"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
@@ -1051,15 +1121,10 @@ int main(void)
 
     if (config.cfg.mode == CONFIG_MODE_EMULATOR)
     {
-        for (int32_t i = 0; i < 0x100; i++)
-        {
-            capture_target_bank[i] = false;
-        }
-        capture_target_bank[0x10] = true;
-        capture_target_bank[0x14] = true;
-
         romemu_init(pio0, 0, rom);
         busmon_init(pio1, 0, ram);
+
+        memcpy(capture_target, config.cfg.capture_target, sizeof(capture_target));
 
         command_table = command_table_emulator;
         multicore_launch_core1(core1_entry_emulator);
