@@ -681,6 +681,48 @@ static void cmd_capture(int argc, const char *const *argv)
     }
 }
 
+static void cmd_list_watch(int argc, const char *const *argv)
+{
+    uint32_t start = 0x0000;
+    uint32_t end = 0xffff;
+    uint32_t addr;
+    bool watch = false;
+    const char *format = "%04x %04x\n";
+
+    if (argc > 1)
+    {
+        start = strtol(argv[1], NULL, 16);
+    }
+    if (argc > 2)
+    {
+        end = strtol(argv[2], NULL, 16);
+    }
+
+    for (addr = start; addr <= end; addr++)
+    {
+        if (!watch)
+        {
+            if (capture_is_target(addr))
+            {
+                watch = true;
+                start = addr;
+            }
+        }
+        else
+        {
+            if (!capture_is_target(addr))
+            {
+                watch = false;
+                printf(format, start, addr - 1);
+            }
+        }
+    }
+    if (watch)
+    {
+        printf(format, start, addr - 1);
+    }
+}
+
 static void cmd_save_watch(int argc, const char *const *argv)
 {
     printf("save capture area ... ");
@@ -949,6 +991,7 @@ static const command_table_t command_table_emulator[] =
     {"watch",   cmd_watch,      "set capture area"},
     {"unwatch", cmd_unwatch,    "unset capture area"},
     {"cap",     cmd_capture,    "show capture log"},
+    {"wlist",   cmd_list_watch, "list capture area"},
     {"wsave",   cmd_save_watch, "save capture area"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
