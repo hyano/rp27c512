@@ -1,6 +1,7 @@
 # RP27C512
 
-**RP27C512**は、秋月電子通商の[RP2040マイコンボードキット(AE-RP2040)](https://akizukidenshi.com/catalog/g/g117542/)を使用して、
+**RP27C512**は、[秋月電子通商](https://akizukidenshi.com/)の
+[RP2040マイコンボードキット(AE-RP2040)](https://akizukidenshi.com/catalog/g/g117542/)を使用して、
 EP-ROM(27C512)のエミュレーションを行うデバイスです。
 このデバイスは、AE-RP2040のGPIOを27C512相当のDIP-28ピンアサインに変換する基板と、GPIOを制御するためのファームウェアで構成されています。
 
@@ -11,7 +12,7 @@ ROMデータ書き換えて機器やプログラムの動作確認をしたり�
 
 興味のある方がいらっしゃれば、基板やキットの頒布を検討しますので、お声掛けください。
 
-<img src="image/RP27C512.jpg" width="640">
+<img src="image/RP27C512.jpg" alt="RP27C512外観" width="640">
 
 ## 概要
 
@@ -57,7 +58,7 @@ ROMデータ書き換えて機器やプログラムの動作確認をしたり�
 ### 部品一覧
 
 [RP27C512/AE-RP2040変換基板](hardware/)の他に必要になる部品の一覧です。
-秋月電子通商で揃える場合の例です。電気的に接続するだけなので、同等品で問題ありません。
+[秋月電子通商](https://akizukidenshi.com/)で揃える場合の例です。電気的に接続するだけなので、同等品で問題ありません。
 子基板はcloneモードでROMを接続しやすくするためのもので、ROMエミュレーションには必要ありません。
 
 * 親基板(本体)
@@ -65,20 +66,21 @@ ROMデータ書き換えて機器やプログラムの動作確認をしたり�
   * [ロープロファイルピンヘッダー(低オス) 1×40(40P) 9.54mm](https://akizukidenshi.com/catalog/g/g100171/)
     * 子基板を取り付けない場合は
       [ロープロファイルピンヘッダー(低オス) 1×40(40P) 7.7mm](https://akizukidenshi.com/catalog/g/g102900/)
-      でよいでしょう。
+      の方が見栄えがよいでしょう。
   * [丸ピンIC用連結ソケット 1×14 MH-1X14-L2](https://akizukidenshi.com/catalog/g/g116982/)
     * 秋葉原の店舗には常備していないようなので要注意です。
     * [丸ピンIC用連結ソケット 両端オスピン・1列14P](https://akizukidenshi.com/catalog/g/g100862/)のピンを切断して使っても、
       [細ピンヘッダー 1×40 (黒)](https://akizukidenshi.com/catalog/g/g106631/)を使ってもよいでしょう。
   * [ピンヘッダー (オスL型) 1×40 (40P)](https://akizukidenshi.com/catalog/g/g101627/)
   * [ショットキーバリアダイオード 45V2A SBM245L](https://akizukidenshi.com/catalog/g/g117439/)
+    * 適当なもので構わないです。VFの小さな安価なものを使いました。
 * 子基板(cloneモード用)
   * [シングルピンソケット (低メス) 1×20 (20P)](https://akizukidenshi.com/catalog/g/g103138/)
   * [ICソケット (28P) 600mil](https://akizukidenshi.com/catalog/g/g115763/)
   * スズメッキ線少々
-    * 親基板のダイオードのリード線の残りで問題ないでしょう。
+    * 親基板のダイオードのリード線の残りなどで問題ないでしょう。
 
-<img src="image/RP27C512_parts.jpg" width="640">
+<img src="image/RP27C512_parts.jpg" alt="部品一覧" width="640">
 
 ### 組み立て(親基板)
 
@@ -99,7 +101,7 @@ ROMデータ書き換えて機器やプログラムの動作確認をしたり�
   * 子基板を使用する場合、ハンダが上方に付着していると子基板のピンソケットに刺さりません。
     スルーホール付近にだけハンダが乗るようにします。多くつき過ぎた場合は、ハンダ吸い取り線で除去するのがよいです。
 
-<img src="image/RP27C512_wo_RP2040.jpg" width="640">
+<img src="image/RP27C512_wo_RP2040.jpg" alt="AE-RP2040を取り付ける前の状態" width="640">
 
 ### 組み立て(子基板)
 
@@ -110,7 +112,7 @@ cloneモードでROMを接続しやすくするための基板です。
   * 次に取り付けるシングルピンソケットも基板に固定した状態でハンダ付けするとよいです。
 * シングルピンソケットを17P分に切断し、基板に取り付けます。
 
-<img src="image/RP27C512_sub.jpg" width="640">
+<img src="image/RP27C512_sub.jpg" alt="cloneモード用子基板" width="640">
 
 ## ファームウェア
 
@@ -188,7 +190,7 @@ ROMが基板直付けの場合は、ICソケットを取り付けると良いで
 
 書き込みアクセスをキャプチャするには、基板下側の4Pピンヘッダのうち、シルクが白く塗りつぶされたピンを/WR信号に接続します。
 
-<img src="image/RP27C512_attached.jpg" width="640">
+<img src="image/RP27C512_attached.jpg" alt="機器の基板に取り付けた例" width="640">
 
 **RP27C512**の起動時にFLASH ROMからROMデータが読み出され、すぐにROMのエミュレーションが開始されます。
 
@@ -205,13 +207,13 @@ cloneモードは、**RP27C512**を直接ROM(27C512)の実チップに接続し�
 子基板を使用する場合は、子基板にROMを取り付け、子基板を**RP27C512**に上から接続します。
 ROMの電源はUSBポートから供給されます。
 
-<img src="image/RP27C512_clone_w_sub.jpg" width="320">
+<img src="image/RP27C512_clone_w_sub.jpg" alt="子基板を使用したROM接続" width="320">
 
 子基板を使用しない場合は、ROMに上から被せる形で**RP27C512**を乗せ、ピン同士を接触させます。
 **RP27C512**を直接被せるのではなく、平ピン型のICソケットを間に挟むと、より接触させやすいです。
 ROMの電源は外部から供給しても良いですし、**RP27C512**のショットキーバリアダイオードをバイパスしてUSBポートから供給しても良いでしょう。
 
-<img src="image/RP27C512_clone_wo_sub.jpg" width="320">
+<img src="image/RP27C512_clone_wo_sub.jpg" alt="子基板を使用しないROM接続" width="320">
 
 接続ができたら、`clone`コマンドで実チップからデータを読み出します。
 読み出しに成功したら、`save`コマンドでFLASH ROMに保存して、`mode emulator`でemulatorモードに戻しておきます。
