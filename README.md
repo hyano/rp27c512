@@ -154,6 +154,7 @@ UARTターミナルを使って、コマンドラインインターフェース�
 |hello|any...|コマンドラインの動作確認用。与えられた引数を表示する。|e/c|
 |reboot|[delay]|再起動する。delayで再起動までの秒数を指定可能。|e/c|
 |mode|"emulator"\|"clone"|ROMエミュレーションを行うemulatorモードとROMの読み出しを行うcloneモードを切り替える。modeはFLASH ROMに保存される。コマンド実行完了後、自動的に再起動する。|e/c|
+|bootsel|[delay]|RP2040をBOOTSELモードで再起動する。|e/c|
 |gpio|-|GPIOの状態を表示する。|e/c|
 |device|"rom"\|"ram"|操作対象のデバイスをROMかRAMで切り替える。ダンプ、データ転送に影響する。|e/-|
 |d|[addr]|デバイス上のデータを指定したアドレスから16進ダンプする。アドレスを省略すると前回の続きをダンプする。|e/c|

@@ -486,17 +486,12 @@ static void cmd_mode(int argc, const char *const *argv)
             reboot(REBOOT_DELAY_MS);
             return;
         }
-        else if (strcmp(argv[1], "bootsel") == 0)
-        {
-            reset_usb_boot(0, 0);
-            return;
-        }
         else
         {
             printf("error: unknown mode.\n");
         }
     }
-    printf("mode emulator|clone|bootsel\n");
+    printf("mode emulator|clone\n");
     switch (config.cfg.mode)
     {
     case CONFIG_MODE_EMULATOR:
@@ -509,6 +504,17 @@ static void cmd_mode(int argc, const char *const *argv)
         printf("current mode: unknown (%d)\n", config.cfg.mode);
         break;
     }
+}
+
+static void cmd_bootsel(int argc, const char *const *argv)
+{
+    if (argc > 0)
+    {
+        uint32_t delay_ms = REBOOT_DELAY_MS;
+        delay_ms = strtol(argv[1], NULL, 10);
+        sleep_ms(delay_ms);
+    }
+    reset_usb_boot(0, 0);
 }
 
 static void cmd_gpio(int argc, const char *const *argv)
@@ -931,6 +937,7 @@ static const command_table_t command_table_emulator[] =
 
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
     {"mode",    cmd_mode,       "select mode (mode emulator|clone)"},
+    {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
     {"gpio",    cmd_gpio,       "show GPIO status"},
 
     {"device",  cmd_device,     "select device (device rom|ram)"},
@@ -966,6 +973,7 @@ static const command_table_t command_table_clone[] =
 
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
     {"mode",    cmd_mode,       "select mode (mode emulator|clone)"},
+    {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
     {"gpio",    cmd_gpio,       "show GPIO status"},
 
     {"d",       cmd_dump,       "dump device (d address)"},
