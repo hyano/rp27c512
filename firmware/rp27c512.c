@@ -437,10 +437,10 @@ static void memdump(const uint8_t *mem, uint32_t addr, int32_t count)
 {
     for (int y = 0; y < count; y++)
     {
-        printf("%04x ", addr);
+        printf("%04x ", addr & 0xffff);
         for (int x = 0; x < 16; x++)
         {
-            printf(" %02x", mem[addr + x]);
+            printf(" %02x", mem[(addr + x) & 0xffff]);
         }
         printf("\n");
         addr += 16;
@@ -630,8 +630,8 @@ static void cmd_watch(int argc, const char *const *argv)
     if (argc > 2)
     {
         uint32_t start, end;
-        start = strtol(argv[1], NULL, 16);
-        end = strtol(argv[2], NULL, 16);
+        start = strtol(argv[1], NULL, 16) & 0xffff;
+        end = strtol(argv[2], NULL, 16) & 0xffff;
         printf("set capture area %04x %04x\n", start, end);
         capture_target_enable(start, end);
     }
@@ -646,8 +646,8 @@ static void cmd_unwatch(int argc, const char *const *argv)
     if (argc > 2)
     {
         uint32_t start, end;
-        start = strtol(argv[1], NULL, 16);
-        end = strtol(argv[2], NULL, 16);
+        start = strtol(argv[1], NULL, 16) & 0xffff;
+        end = strtol(argv[2], NULL, 16) & 0xffff;
         printf("unset capture area %04x %04x\n", start, end);
         capture_target_disable(start, end);
     }
@@ -691,11 +691,11 @@ static void cmd_list_watch(int argc, const char *const *argv)
 
     if (argc > 1)
     {
-        start = strtol(argv[1], NULL, 16);
+        start = strtol(argv[1], NULL, 16) & 0xffff;
     }
     if (argc > 2)
     {
-        end = strtol(argv[2], NULL, 16);
+        end = strtol(argv[2], NULL, 16) & 0xffff;
     }
 
     for (addr = start; addr <= end; addr++)
