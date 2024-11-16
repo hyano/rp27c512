@@ -501,6 +501,11 @@ static void cmd_hello(int argc, const char *const *argv)
     }
 }
 
+static void cmd_cls(int argc, const char *const *argv)
+{
+    printf("\x1b[2J");
+}
+
 
 static void cmd_reboot(int argc, const char *const *argv)
 {
@@ -1331,6 +1336,7 @@ static const command_table_t command_table_emulator[] =
     {"?",       cmd_help,       "show help"},
 
     {"hello",   cmd_hello,      "test: hello, world"},
+    {"cls",     cmd_cls,        "clear screen"},
 
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
     {"mode",    cmd_mode,       "select mode (mode emulator|snoop|clone)"},
@@ -1371,6 +1377,7 @@ static const command_table_t command_table_clone[] =
     {"?",       cmd_help,       "show help"},
 
     {"hello",   cmd_hello,      "test: hello, world"},
+    {"cls",     cmd_cls,        "clear screen"},
 
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
     {"mode",    cmd_mode,       "select mode (mode emulator|snoop|clone)"},
