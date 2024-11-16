@@ -4,4 +4,4 @@ add_library(xmodem STATIC
     xmodem.c
 )
 
-target_include_directories(xmodem PUBLIC .)
+target_include_directories(xmodem PUBLIC ${CMAKE_CURRENT_LIST_DIR})
