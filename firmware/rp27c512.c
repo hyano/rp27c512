@@ -610,7 +610,7 @@ static struct
     {"ext0",        GPIO_EXT0},
     {"ext1",        GPIO_EXT1},
     {"ext2",        GPIO_EXT2},
-    {NULL, 0}
+    {NULL,          0}
 };
 
 static uint32_t get_gpio_pin(const char *s)
