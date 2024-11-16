@@ -346,7 +346,9 @@ PIOステートマシン1つ(SM)とDMAを2チャネル(DMA0, DMA1)使用して�
 
 ## デモ動画
 
-[![RP27C512デモ](http://img.youtube.com/vi/x7gpchJdmzs/0.jpg)](https://youtu.be/x7gpchJdmzs)
+<div>
+<iframe width="480" src="https://www.youtube.com/embed/x7gpchJdmzs" title="RP27C512デモ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
 
 ## 注意事項
 
