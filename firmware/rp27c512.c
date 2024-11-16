@@ -938,6 +938,29 @@ static void cmd_move(int argc, const char *const *argv)
     printf("m start end dest\n");
 }
 
+static void cmd_fill(int argc, const char *const *argv)
+{
+    if (argc > 3)
+    {
+        uint32_t addr;
+        uint32_t start;
+        uint32_t end;
+        uint32_t value;
+        start = strtol(argv[1], NULL, 16) & 0xffff;
+        end = strtol(argv[2], NULL, 16) & 0xffff;
+        value = strtol(argv[3], NULL, 16) & 0xff;
+        if (start <= end)
+        {
+            for (uint32_t addr = start; addr < end; addr++)
+            {
+                device[addr] = value;
+            }
+            return;
+        }
+    }
+    printf("f start end value\n");
+}
+
 static void cmd_watch(int argc, const char *const *argv)
 {
     if (argc > 2)
@@ -1303,6 +1326,7 @@ static const command_table_t command_table_emulator[] =
 
     {"e",       cmd_edit,       "edit memory"},
     {"m",       cmd_move,       "move memory"},
+    {"f",       cmd_fill,       "fill memory"},
 
     {"watch",   cmd_watch,      "set capture area"},
     {"unwatch", cmd_unwatch,    "unset capture area"},
@@ -1340,6 +1364,7 @@ static const command_table_t command_table_clone[] =
 
     {"e",       cmd_edit,       "edit memory"},
     {"m",       cmd_move,       "move memory"},
+    {"f",       cmd_fill,       "fill memory"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
