@@ -344,6 +344,9 @@ PIOステートマシン1つ(SM)とDMAを2チャネル(DMA0, DMA1)使用して�
 * DMA0は、DMA1の転送先アドレスをリングバッファの先頭に設定して、DMA1を再起動します。
 * 上記を繰り返します。
 
+## デモ動画
+
+[![RP27C512デモ](http://img.youtube.com/vi/x7gpchJdmzs/0.jpg)](https://youtu.be/x7gpchJdmzs?t=3)
 
 ## 注意事項
 
