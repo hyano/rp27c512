@@ -895,6 +895,49 @@ static void cmd_edit(int argc, const char *const *argv)
     }
 }
 
+static void cmd_move(int argc, const char *const *argv)
+{
+    if (argc > 3)
+    {
+        uint32_t addr;
+        uint32_t start;
+        uint32_t end;
+        uint32_t dest;
+        start = strtol(argv[1], NULL, 16) & 0xffff;
+        end = strtol(argv[2], NULL, 16) & 0xffff;
+        dest = strtol(argv[3], NULL, 16) & 0xffff;
+        if (start <= end)
+        {
+            if (dest > start)
+            {
+                addr = end;
+                dest = (dest + (end - start)) & 0xffff;
+                for (;;)
+                {
+                    device[dest] = device[addr];
+                    if  (addr == start) break;
+                    dest = (dest - 1) & 0xffff;
+                    addr = (addr - 1) & 0xffff;
+                }
+                return;
+            }
+            else if (dest < start)
+            {
+                addr = start;
+                for (;;)
+                {
+                    device[dest] = device[addr];
+                    if  (addr == end) break;
+                    dest = (dest + 1) & 0xffff;
+                    addr = (addr + 1) & 0xffff;
+                }
+                return;
+            }
+        }
+    }
+    printf("m start end dest\n");
+}
+
 static void cmd_watch(int argc, const char *const *argv)
 {
     if (argc > 2)
@@ -1259,6 +1302,7 @@ static const command_table_t command_table_emulator[] =
     {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
 
     {"e",       cmd_edit,       "edit memory"},
+    {"m",       cmd_move,       "move memory"},
 
     {"watch",   cmd_watch,      "set capture area"},
     {"unwatch", cmd_unwatch,    "unset capture area"},
@@ -1295,6 +1339,7 @@ static const command_table_t command_table_clone[] =
     {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
 
     {"e",       cmd_edit,       "edit memory"},
+    {"m",       cmd_move,       "move memory"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
