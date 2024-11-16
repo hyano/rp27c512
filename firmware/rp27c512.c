@@ -720,6 +720,7 @@ static void cmd_gpio(int argc, const char *const *argv)
             printf("done.\n");
             return;
         }
+        //if (argc == 2 && strcmp(argv[1], "help") == 0)
         {
             printf("gpio commands:\n");
             printf("  gpio in pin (only for ext0-2)\n");
@@ -1317,7 +1318,7 @@ static const command_table_t command_table_emulator[] =
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
     {"mode",    cmd_mode,       "select mode (mode emulator|clone)"},
     {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
-    {"gpio",    cmd_gpio,       "show GPIO status"},
+    {"gpio",    cmd_gpio,       "control GPIO (gpio help)"},
 
     {"device",  cmd_device,     "select device (device rom|ram)"},
     {"d",       cmd_dump,       "dump device (d address)"},
@@ -1357,7 +1358,7 @@ static const command_table_t command_table_clone[] =
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
     {"mode",    cmd_mode,       "select mode (mode emulator|clone)"},
     {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
-    {"gpio",    cmd_gpio,       "show GPIO status"},
+    {"gpio",    cmd_gpio,       "control GPIO (gpio help)"},
 
     {"d",       cmd_dump,       "dump device (d address)"},
     {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
