@@ -1494,6 +1494,28 @@ int main(void)
     // Overclocking
     set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
+    {
+        gpio_config = config.cfg.gpio_config;
+
+        // only for ext0-2
+        gpio_set_dir_out_masked(gpio_config.dir & GPIO_EXT_MASK);
+        gpio_set_dir_in_masked(~gpio_config.dir & GPIO_EXT_MASK);
+        gpio_set_mask(gpio_config.value & GPIO_EXT_MASK);
+        gpio_clr_mask(~gpio_config.value & GPIO_EXT_MASK);
+
+        for (uint32_t pin = 0; pin < GPIO_END; pin++)
+        {
+            if (gpio_config.pullup & (1 << pin))
+            {
+                gpio_pull_up(pin);
+            }
+            if (gpio_config.pulldown & (1 << pin))
+            {
+                gpio_pull_down(pin);
+            }
+        }
+    }
+
 #ifdef DEBUG_PULL_UP
     {
         // for debugging with logic analyzer
@@ -1513,27 +1535,6 @@ int main(void)
     gpio_pull_up(GPIO_OE);
     gpio_pull_up(GPIO_WR);
 #endif
-
-    gpio_config = config.cfg.gpio_config;
-    {
-        // only for ext0-2
-        gpio_set_dir_out_masked(gpio_config.dir & GPIO_EXT_MASK);
-        gpio_set_dir_in_masked(~gpio_config.dir & GPIO_EXT_MASK);
-        gpio_set_mask(gpio_config.value & GPIO_EXT_MASK);
-        gpio_clr_mask(~gpio_config.value & GPIO_EXT_MASK);
-
-        for (uint32_t pin = 0; pin < GPIO_END; pin++)
-        {
-            if (gpio_config.pullup & (1 << pin))
-            {
-                gpio_pull_up(pin);
-            }
-            if (gpio_config.pulldown & (1 << pin))
-            {
-                gpio_pull_down(pin);
-            }
-        }
-    }
 
     if (config.cfg.mode == CONFIG_MODE_EMULATOR)
     {
