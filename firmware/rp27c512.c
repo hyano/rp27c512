@@ -223,22 +223,6 @@ static bool config_save_slow(void)
     return ret;
 }
 
-static void ram_clear(void)
-{
-    static uint32_t zero = 0;
-    int ch = dma_claim_unused_channel(true);
-
-    dma_channel_config c = dma_channel_get_default_config(ch);
-    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
-    channel_config_set_read_increment(&c, false);
-    channel_config_set_write_increment(&c, true);
-
-    dma_channel_configure(ch, &c, ram, &zero, sizeof(ram) / 4, true);
-
-    dma_channel_wait_for_finish_blocking(ch);
-
-    dma_channel_unclaim(ch);
-}
 
 static bool rom_load(int32_t bank)
 {
@@ -385,6 +369,24 @@ static inline bool capture_is_target(uint32_t addr)
     return (capture_target[addr / 8] & (1 << (addr % 8))) != 0;
 }
 
+
+static void zero_clear(uint8_t *p, int32_t size)
+{
+    static uint32_t zero = 0;
+    int ch = dma_claim_unused_channel(true);
+
+    dma_channel_config c = dma_channel_get_default_config(ch);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+    channel_config_set_read_increment(&c, false);
+    channel_config_set_write_increment(&c, true);
+
+    dma_channel_configure(ch, &c, p, &zero, size / sizeof(uint32_t), true);
+
+    dma_channel_wait_for_finish_blocking(ch);
+
+    dma_channel_unclaim(ch);
+}
+
 static void reboot(uint32_t delay_ms)
 {
     printf("rebooting...\n\n");
@@ -412,6 +414,7 @@ static void read_rom(uint8_t *dst, uint32_t start, uint32_t end)
     }
     gpio_put_all(bit(GPIO_CE) | bit(GPIO_OE));
 }
+
 
 static void core1_entry_emulator(void)
 {
@@ -449,6 +452,7 @@ static void core1_entry_clone(void)
         tight_loop_contents();
     }
 }
+
 
 static void memdump(const uint8_t *mem, uint32_t addr, int32_t count)
 {
@@ -495,6 +499,7 @@ static void cmd_hello(int argc, const char *const *argv)
         printf("%d: %s\n", i, argv[i]);
     }
 }
+
 
 static void cmd_reboot(int argc, const char *const *argv)
 {
@@ -1443,6 +1448,7 @@ static char **mrl_complete(microrl_t *mrl, int argc, const char *const *argv)
     return complete_table;
 }
 
+
 static void shell(void)
 {
     microrl_t rl;
@@ -1485,10 +1491,21 @@ int main(void)
         config_save_init();
     }
 
+    switch (config.cfg.mode)
     {
-        int32_t ch = rom_load_async_start(config.cfg.rom_bank);
-        ram_clear();
-        rom_load_async_wait(ch);
+    case CONFIG_MODE_EMULATOR:
+        {
+            int32_t ch = rom_load_async_start(config.cfg.rom_bank);
+            zero_clear(ram, sizeof(ram));
+            rom_load_async_wait(ch);
+        }
+        break;
+    case CONFIG_MODE_CLONE:
+        {
+            zero_clear(rom, sizeof(rom));
+            zero_clear(ram, sizeof(ram));
+        }
+        break;
     }
 
     // Overclocking
