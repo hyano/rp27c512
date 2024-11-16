@@ -158,6 +158,7 @@ UARTターミナルを使って、コマンドラインインターフェース�
 |-|-|-|-|
 |help, ?|-|ヘルプを表示する。|e/s/c|
 |hello|any...|コマンドラインの動作確認用。与えられた引数を表示する。|e/s/c|
+|cls|-|画面をクリアする。|e/s/c|
 |reboot|[delay]|再起動する。delayで再起動までの秒数を指定可能。|e/s/c|
 |mode|"emulator"\|"snoop"\|"clone"|ROMエミュレーションを行うemulatorモード、アクセスの解析のみを行うsnoopモード、ROMの読み出しを行うcloneモードを切り替える。modeはFLASH ROMに保存される。コマンド実行完了後、自動的に再起動する。|e/s/c|
 |bootsel|[delay]|RP2040をBOOTSELモードで再起動する。|e/s/c|
