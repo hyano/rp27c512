@@ -56,6 +56,7 @@
 #define GPIO_EXT0_MASK (1 << GPIO_EXT0)
 #define GPIO_EXT1_MASK (1 << GPIO_EXT1)
 #define GPIO_EXT2_MASK (1 << GPIO_EXT2)
+#define GPIO_EXT_MASK (GPIO_EXT0_MASK | GPIO_EXT1_MASK | GPIO_EXT2_MASK)
 
 #define GPIO_GET_DATA(v) (((v) & GPIO_DATA_MASK) >> GPIO_DATA)
 
@@ -113,10 +114,19 @@ typedef enum config_mode
 
 typedef struct
 {
+    uint32_t dir;
+    uint32_t value;
+    uint32_t pullup;
+    uint32_t pulldown;
+} gpio_config_t;
+
+typedef struct
+{
     char            magic[MAGIC_SIZE];
     config_mode_e   mode;
     int32_t         rom_bank;
     int32_t         dump_line_count;
+    gpio_config_t   gpio_config;
     uint8_t         capture_target[0x10000 / 8];
 } config_t;
 
@@ -127,6 +137,7 @@ typedef union
 } config_u;
 
 config_u __noinit(config);
+gpio_config_t __noinit(gpio_config);
 
 static inline uint32_t bit(uint32_t bn)
 {
@@ -143,9 +154,13 @@ static void config_init(void)
 {
     memset(&config, 0, sizeof(config));
     memcpy(config.cfg.magic, MAGIC_STR, MAGIC_SIZE);
+
     config.cfg.mode = CONFIG_MODE_EMULATOR;
     config.cfg.rom_bank = 0;
     config.cfg.dump_line_count = DEFAULT_DUMP_LINE_COUNT;
+
+    config.cfg.gpio_config.dir = 0x00000000;
+    config.cfg.gpio_config.pulldown = GPIO_EXT_MASK;
 }
 
 static bool config_is_valid(void)
@@ -517,9 +532,194 @@ static void cmd_bootsel(int argc, const char *const *argv)
     reset_usb_boot(0, 0);
 }
 
+static struct
+{
+    const char* name;
+    uint32_t pin;
+} gpio_pin_name_table[] =
+{
+    {"a0",          GPIO_ADDR + 0},
+    {"a1",          GPIO_ADDR + 1},
+    {"a2",          GPIO_ADDR + 2},
+    {"a3",          GPIO_ADDR + 3},
+    {"a4",          GPIO_ADDR + 4},
+    {"a5",          GPIO_ADDR + 5},
+    {"a6",          GPIO_ADDR + 6},
+    {"a7",          GPIO_ADDR + 7},
+    {"a8",          GPIO_ADDR + 8},
+    {"a9",          GPIO_ADDR + 9},
+    {"a10",         GPIO_ADDR + 10},
+    {"a11",         GPIO_ADDR + 11},
+    {"a12",         GPIO_ADDR + 12},
+    {"a13",         GPIO_ADDR + 13},
+    {"a14",         GPIO_ADDR + 14},
+    {"a15",         GPIO_ADDR + 15},
+    {"d0",          GPIO_DATA + 0},
+    {"d1",          GPIO_DATA + 1},
+    {"d2",          GPIO_DATA + 2},
+    {"d3",          GPIO_DATA + 3},
+    {"d4",          GPIO_DATA + 4},
+    {"d5",          GPIO_DATA + 5},
+    {"d6",          GPIO_DATA + 6},
+    {"d7",          GPIO_DATA + 7},
+    {"cs",          GPIO_CS},
+    {"oe",          GPIO_OE},
+    {"wr",          GPIO_WR},
+    {"ext0",        GPIO_EXT0},
+    {"ext1",        GPIO_EXT1},
+    {"ext2",        GPIO_EXT2},
+    {NULL, 0}
+};
+
+static uint32_t get_gpio_pin(const char *s)
+{
+    for (int32_t idx = 0; gpio_pin_name_table[idx].name != NULL; idx++)
+    {
+        if (strcmp(s, gpio_pin_name_table[idx].name) == 0)
+        {
+            return gpio_pin_name_table[idx].pin;
+        }
+    }
+    {
+        uint32_t pin;
+        char *end;
+        pin = strtol(s, &end, 10);
+        if (*end == '\0')
+        {
+            return pin;
+        }
+    }
+    return UINT32_MAX;
+}
+
 static void cmd_gpio(int argc, const char *const *argv)
 {
-    printf("GPIO: %08x\n", gpio_get_all());
+    if (argc > 1)
+    {
+        uint32_t pin = UINT32_MAX;
+        if (argc == 3 && strcmp(argv[1], "in") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if ((1 << pin) & GPIO_EXT_MASK)
+            {
+                gpio_config.dir &= ~(1 << pin) & GPIO_EXT_MASK;
+                gpio_set_dir_in_masked(~gpio_config.dir & GPIO_EXT_MASK);
+                return;
+            }
+        }
+        if (argc == 3 && strcmp(argv[1], "out") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if ((1 << pin) & GPIO_EXT_MASK)
+            {
+                gpio_config.dir |= (1 << pin) & GPIO_EXT_MASK;
+                gpio_set_dir_out_masked(gpio_config.dir & GPIO_EXT_MASK);
+                return;
+            }
+        }
+        if (argc == 3 && strcmp(argv[1], "pullup") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if (pin < GPIO_END)
+            {
+                gpio_config.pullup |= (1 << pin) & GPIO_ALL_MASK;
+                gpio_config.pulldown &= ~(1 << pin) & GPIO_ALL_MASK;
+                gpio_pull_up(pin);
+                return;
+            }
+        }
+        if (argc == 3 && strcmp(argv[1], "pulldown") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if (pin < GPIO_END)
+            {
+                gpio_config.pullup &= ~(1 << pin) & GPIO_ALL_MASK;
+                gpio_config.pulldown |= (1 << pin) & GPIO_ALL_MASK;
+                gpio_pull_down(pin);
+                return;
+            }
+        }
+        if (argc == 3 && strcmp(argv[1], "pullno") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if (pin < GPIO_END)
+            {
+                gpio_config.pullup &= ~(1 << pin) & GPIO_ALL_MASK;
+                gpio_config.pulldown &= ~(1 << pin) & GPIO_ALL_MASK;
+                gpio_disable_pulls(pin);
+                return;
+            }
+        }
+        if (argc == 3 && strcmp(argv[1], "set") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if ((1 << pin) & GPIO_EXT_MASK)
+            {
+                gpio_config.value |= (1 << pin) & GPIO_EXT_MASK;
+                gpio_put(pin, true);
+                return;
+            }
+        }
+        if (argc == 3 && strcmp(argv[1], "clr") == 0)
+        {
+            pin = get_gpio_pin(argv[2]);
+            if ((1 << pin) & GPIO_EXT_MASK)
+            {
+                gpio_config.value &= ~(1 << pin) & GPIO_EXT_MASK;
+                gpio_put(pin, false);
+                return;
+            }
+        }
+        if (argc > 2 && strcmp(argv[1], "pulse") == 0)
+        {
+            uint32_t width_us = 100;
+            pin = get_gpio_pin(argv[2]);
+            if (argc > 3)
+            {
+                width_us = strtol(argv[3], NULL, 10);
+            }
+            if ((1 << pin) & GPIO_EXT_MASK)
+            {
+                bool value = (gpio_config.value & (1 << pin)) != 0;
+                gpio_put(pin, !value);
+                sleep_us(width_us);
+                gpio_put(pin, value);
+                return;
+            }
+        }
+        if (argc == 2 && strcmp(argv[1], "save") == 0)
+        {
+            printf("save GPIO settings ... ");
+            config.cfg.gpio_config = gpio_config;
+            config_save_slow();
+            printf("done.\n");
+            return;
+        }
+        {
+            printf("gpio commands:\n");
+            printf("  gpio in pin (only for ext0-2)\n");
+            printf("  gpio out pin (only for ext0-2)\n");
+            printf("  gpio pullup pin\n");
+            printf("  gpio pulldown pin\n");
+            printf("  gpio pullno pin\n");
+            printf("  gpio set pin (only for ext0-2)\n");
+            printf("  gpio clr pin (only for ext0-2)\n");
+            printf("  gpio pulse pin width\n");
+            printf("  gpio save\n");
+            printf("pin name & pin no:\n");
+            for (int32_t idx = 0; gpio_pin_name_table[idx].name != NULL; idx++)
+            {
+                printf("  %-4s %d\n", gpio_pin_name_table[idx].name, gpio_pin_name_table[idx].pin);
+            }
+            return;
+        }
+    }
+    printf("GPIO:\n");
+    printf(" current : %08x\n", gpio_get_all());
+    printf(" dir     : %08x\n", gpio_config.dir);
+    printf(" initial : %08x\n", gpio_config.value);
+    printf(" pullup  : %08x\n", gpio_config.pullup);
+    printf(" pulldown: %08x\n", gpio_config.pulldown);
 }
 
 static void cmd_device(int argc, const char *const *argv)
@@ -1169,11 +1369,25 @@ int main(void)
     gpio_pull_up(GPIO_WR);
 #endif
 
+    gpio_config = config.cfg.gpio_config;
     {
-        // for future use
-        gpio_pull_down(GPIO_EXT0);
-        gpio_pull_down(GPIO_EXT1);
-        gpio_pull_down(GPIO_EXT2);
+        // only for ext0-2
+        gpio_set_dir_out_masked(gpio_config.dir & GPIO_EXT_MASK);
+        gpio_set_dir_in_masked(~gpio_config.dir & GPIO_EXT_MASK);
+        gpio_set_mask(gpio_config.value & GPIO_EXT_MASK);
+        gpio_clr_mask(~gpio_config.value & GPIO_EXT_MASK);
+
+        for (uint32_t pin = 0; pin < GPIO_END; pin++)
+        {
+            if (gpio_config.pullup & (1 << pin))
+            {
+                gpio_pull_up(pin);
+            }
+            if (gpio_config.pulldown & (1 << pin))
+            {
+                gpio_pull_down(pin);
+            }
+        }
     }
 
     if (config.cfg.mode == CONFIG_MODE_EMULATOR)
