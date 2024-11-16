@@ -346,7 +346,7 @@ PIOステートマシン1つ(SM)とDMAを2チャネル(DMA0, DMA1)使用して�
 
 ## デモ動画
 
-https://github.com/user-attachments/assets/db190973-2f4f-480f-84ba-13c8b643ebdd
+https://github.com/user-attachments/assets/20a8eae4-5df2-4a57-8465-a8b28be44191
 
 ## 注意事項
 
