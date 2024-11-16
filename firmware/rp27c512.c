@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <tusb.h>
 
 #include "microrl.h"
@@ -456,6 +457,12 @@ static void memdump(const uint8_t *mem, uint32_t addr, int32_t count)
         for (int x = 0; x < 16; x++)
         {
             printf(" %02x", mem[(addr + x) & 0xffff]);
+        }
+        printf("  ");
+        for (int x = 0; x < 16; x++)
+        {
+            int c = mem[(addr + x) & 0xffff];
+            printf("%c", isprint(c) ? c : '.');
         }
         printf("\n");
         addr += 16;
