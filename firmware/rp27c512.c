@@ -1511,6 +1511,7 @@ int main(void)
     // Overclocking
     set_sys_clock_khz(CPU_CLOCK_FREQ_HIGH, true);
 
+    // init GPIO
     {
         gpio_config = config.cfg.gpio_config;
 
@@ -1553,36 +1554,41 @@ int main(void)
     gpio_pull_up(GPIO_WR);
 #endif
 
-    if (config.cfg.mode == CONFIG_MODE_EMULATOR)
+    switch (config.cfg.mode)
     {
-        romemu_init(pio0, 0, rom);
-        busmon_init(pio1, 0, ram);
-
-        memcpy(capture_target, config.cfg.capture_target, sizeof(capture_target));
-
-        command_table = command_table_emulator;
-        multicore_launch_core1(core1_entry_emulator);
-    }
-    else if (config.cfg.mode == CONFIG_MODE_CLONE)
-    {
-        gpio_set_dir_out_masked(GPIO_ADDR_MASK | GPIO_CE_MASK | GPIO_OE_MASK);
-        gpio_set_dir_in_masked(GPIO_DATA_MASK);
-        for (uint pin = GPIO_ADDR; pin < GPIO_ADDR_END; pin++)
+    case CONFIG_MODE_EMULATOR:
         {
-            gpio_pull_up(pin);
-            gpio_set_drive_strength(pin, GPIO_DRIVE_STRENGTH_12MA);
-        }
-        for (uint pin = GPIO_DATA; pin < GPIO_DATA_END; pin++)
-        {
-            gpio_pull_up(pin);
-        }
-        gpio_pull_up(GPIO_CE);
-        gpio_set_drive_strength(GPIO_CE, GPIO_DRIVE_STRENGTH_12MA);
-        gpio_pull_up(GPIO_OE);
-        gpio_set_drive_strength(GPIO_OE, GPIO_DRIVE_STRENGTH_12MA);
+            romemu_init(pio0, 0, rom);
+            busmon_init(pio1, 0, ram);
 
-        command_table = command_table_clone;
-        multicore_launch_core1(core1_entry_clone);
+            memcpy(capture_target, config.cfg.capture_target, sizeof(capture_target));
+
+            command_table = command_table_emulator;
+            multicore_launch_core1(core1_entry_emulator);
+        }
+        break;
+    case CONFIG_MODE_CLONE:
+        {
+            gpio_set_dir_out_masked(GPIO_ADDR_MASK | GPIO_CE_MASK | GPIO_OE_MASK);
+            gpio_set_dir_in_masked(GPIO_DATA_MASK);
+            for (uint pin = GPIO_ADDR; pin < GPIO_ADDR_END; pin++)
+            {
+                gpio_pull_up(pin);
+                gpio_set_drive_strength(pin, GPIO_DRIVE_STRENGTH_12MA);
+            }
+            for (uint pin = GPIO_DATA; pin < GPIO_DATA_END; pin++)
+            {
+                gpio_pull_up(pin);
+            }
+            gpio_pull_up(GPIO_CE);
+            gpio_set_drive_strength(GPIO_CE, GPIO_DRIVE_STRENGTH_12MA);
+            gpio_pull_up(GPIO_OE);
+            gpio_set_drive_strength(GPIO_OE, GPIO_DRIVE_STRENGTH_12MA);
+
+            command_table = command_table_clone;
+            multicore_launch_core1(core1_entry_clone);
+        }
+        break;
     }
 
     while (!tud_cdc_connected())
