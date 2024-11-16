@@ -346,6 +346,10 @@ PIOステートマシン1つ(SM)とDMAを2チャネル(DMA0, DMA1)使用して�
 
 ## デモ動画
 
+Roland CM-32PのROMを**RP27C512**で置き換え、
+X68000版 闇の血族(1990 システムサコム)のBGM(CM-64向け)を演奏した時のRAMの内容のダンプ、
+PCMデバイスへのアクセスの監視をしている様子をデモとして録画したものです。
+
 https://github.com/user-attachments/assets/20a8eae4-5df2-4a57-8465-a8b28be44191
 
 ## 注意事項
