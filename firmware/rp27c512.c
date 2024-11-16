@@ -815,7 +815,7 @@ static void cmd_dump(int argc, const char *const *argv)
         addr = strtol(argv[1], NULL, 16);
     }
     memdump(device, addr, config.cfg.dump_line_count);
-    addr += 0x100;
+    addr += 0x10 * config.cfg.dump_line_count;
 }
 
 static void cmd_dump_watch(int argc, const char *const *argv)
@@ -832,7 +832,7 @@ static void cmd_dump_watch(int argc, const char *const *argv)
         printf("\x1b[0;0H");
         memdump(device, addr, config.cfg.dump_line_count);
     }
-    addr += 0x100;
+    addr += 0x10 * config.cfg.dump_line_count;
     printf("\x1b[?25h"); // cursor on
 }
 
@@ -1210,7 +1210,7 @@ static void cmd_erase(int argc, const char *const *argv)
     {
         // for safety
         //bank = config.cfg.rom_bank;
-        printf("erase 0,1,2,3\n");
+        printf("erase 0|1|2|3\n");
         return;
     }
 
@@ -1338,24 +1338,24 @@ static const command_table_t command_table_emulator[] =
     {"hello",   cmd_hello,      "test: hello, world"},
     {"cls",     cmd_cls,        "clear screen"},
 
-    {"reboot",  cmd_reboot,     "reboot RP27C512"},
+    {"reboot",  cmd_reboot,     "reboot RP27C512 (reboot delay)"},
     {"mode",    cmd_mode,       "select mode (mode emulator|snoop|clone)"},
-    {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
+    {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode (bootsel delay)"},
     {"gpio",    cmd_gpio,       "control GPIO (gpio help)"},
 
     {"device",  cmd_device,     "select device (device rom|ram)"},
-    {"d",       cmd_dump,       "dump device (d address)"},
-    {"dw",      cmd_dump_watch, "dump device repeatly (dw address)"},
-    {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
+    {"d",       cmd_dump,       "dump device (d addr)"},
+    {"dw",      cmd_dump_watch, "dump device repeatly (dw addr)"},
+    {"dlen",    cmd_dump_len,   "set dump line count (dlen len [save])"},
 
-    {"e",       cmd_edit,       "edit memory"},
-    {"m",       cmd_move,       "move memory"},
-    {"f",       cmd_fill,       "fill memory"},
+    {"e",       cmd_edit,       "edit memory (e [addr [value]])"},
+    {"m",       cmd_move,       "move memory (m start end dest)"},
+    {"f",       cmd_fill,       "fill memory (f start end value)"},
 
-    {"watch",   cmd_watch,      "set capture area"},
-    {"unwatch", cmd_unwatch,    "unset capture area"},
+    {"watch",   cmd_watch,      "set capture area (watch start end)"},
+    {"unwatch", cmd_unwatch,    "unset capture area (unwatch start end)"},
     {"cap",     cmd_capture,    "show capture log"},
-    {"wlist",   cmd_list_watch, "list capture area"},
+    {"wlist",   cmd_list_watch, "list capture area (wlist [start [end]])"},
     {"wsave",   cmd_save_watch, "save capture area"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
@@ -1364,7 +1364,7 @@ static const command_table_t command_table_emulator[] =
     {"bank",    cmd_bank,       "select flash rom bank (bank 0|1|2|3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
-    {"erase",   cmd_erase,      "erase flash rom bank"},
+    {"erase",   cmd_erase,      "erase flash rom bank (erase 0|1|2|3)"},
 
     {"init",    cmd_init,       "initialize rom/config (init all|rom|config)"},
 
@@ -1379,17 +1379,17 @@ static const command_table_t command_table_clone[] =
     {"hello",   cmd_hello,      "test: hello, world"},
     {"cls",     cmd_cls,        "clear screen"},
 
-    {"reboot",  cmd_reboot,     "reboot RP27C512"},
+    {"reboot",  cmd_reboot,     "reboot RP27C512 (reboot delay)"},
     {"mode",    cmd_mode,       "select mode (mode emulator|snoop|clone)"},
-    {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
+    {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode (bootsel delay)"},
     {"gpio",    cmd_gpio,       "control GPIO (gpio help)"},
 
-    {"d",       cmd_dump,       "dump device (d address)"},
-    {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
+    {"d",       cmd_dump,       "dump device (d addr)"},
+    {"dlen",    cmd_dump_len,   "set dump line count (dlen len [save])"},
 
-    {"e",       cmd_edit,       "edit memory"},
-    {"m",       cmd_move,       "move memory"},
-    {"f",       cmd_fill,       "fill memory"},
+    {"e",       cmd_edit,       "edit memory (e [addr [value]])"},
+    {"m",       cmd_move,       "move memory (m start end dest)"},
+    {"f",       cmd_fill,       "fill memory (f start end value)"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
@@ -1397,7 +1397,7 @@ static const command_table_t command_table_clone[] =
     {"bank",    cmd_bank,       "select flash rom bank (bank 0|1|2|3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
-    {"erase",   cmd_erase,      "erase flash rom bank"},
+    {"erase",   cmd_erase,      "erase flash rom bank (erase 0|1|2|3)"},
 
     {"clone",   cmd_clone,      "clone from real ROM chip (clone wait verify_num)"},
 
