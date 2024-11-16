@@ -462,6 +462,23 @@ static void memdump(const uint8_t *mem, uint32_t addr, int32_t count)
     }
 }
 
+static void dump_diff(const uint8_t *mem0, const uint8_t *mem1, int32_t count, int32_t max_diff_count)
+{
+    int32_t diff_count = 0;
+    for (int32_t idx = 0; idx < count; idx++)
+    {
+        if (mem0[idx] != mem1[idx])
+        {
+            diff_count++;
+            if (diff_count <= max_diff_count)
+            {
+                printf("  %04x: %02x %02x\n", idx, mem0[idx], mem1[idx]);
+            }
+        }
+    }
+    printf(" %d missmatch(es)\n", diff_count);
+}
+
 static void cmd_hello(int argc, const char *const *argv)
 {
     printf("hello world\n");
@@ -1103,6 +1120,7 @@ static void cmd_clone(int argc, const char *const *argv)
         else
         {
             printf("NG\n");
+            dump_diff(rom, ram, 0x10000, 16);
             clone_ok = false;
         }
     }
