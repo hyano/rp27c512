@@ -36,7 +36,7 @@ static void busmon_wr_init(PIO pio, uint sm, uint offset, uint pin, uint8_t *ram
 
 
 #define BUSMON_CAP_BUFFER_SHIFT (6)
-#define BUSMON_CAP_BUFFER_COUNT  (1 << BUSMON_CAP_BUFFER_SHIFT)
+#define BUSMON_CAP_BUFFER_COUNT (1 << BUSMON_CAP_BUFFER_SHIFT)
 static uint32_t __noinit(busmon_cap_buffer[BUSMON_CAP_BUFFER_COUNT]) __attribute__ ((aligned (sizeof(uint32_t) * BUSMON_CAP_BUFFER_COUNT)));
 static uint32_t busmon_cap_buffer_count = BUSMON_CAP_BUFFER_COUNT;
 static int busmon_cap_dma_ch = 0;
