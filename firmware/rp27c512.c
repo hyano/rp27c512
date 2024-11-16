@@ -1355,7 +1355,7 @@ static const command_table_t command_table_emulator[] =
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
 
-    {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
+    {"bank",    cmd_bank,       "select flash rom bank (bank 0|1|2|3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
     {"erase",   cmd_erase,      "erase flash rom bank"},
@@ -1387,7 +1387,7 @@ static const command_table_t command_table_clone[] =
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
 
-    {"bank",    cmd_bank,       "select flash rom bank (bank 0,1,2,3)"},
+    {"bank",    cmd_bank,       "select flash rom bank (bank 0|1|2|3)"},
     {"load",    cmd_load,       "load data from current flash rom bank"},
     {"save",    cmd_save,       "save data to current flash rom bank"},
     {"erase",   cmd_erase,      "erase flash rom bank"},
