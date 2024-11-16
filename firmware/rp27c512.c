@@ -110,6 +110,7 @@ static const uint8_t *flash_target_contents_rom[ROM_BANK_NUM] =
 typedef enum config_mode
 {
     CONFIG_MODE_EMULATOR = 0,
+    CONFIG_MODE_SNOOP,
     CONFIG_MODE_CLONE,
     CONFIG_MODE_NUM
 } config_mode_e;
@@ -523,6 +524,14 @@ static void cmd_mode(int argc, const char *const *argv)
             reboot(REBOOT_DELAY_MS);
             return;
         }
+        else if (strcmp(argv[1], "snoop") == 0)
+        {
+            config.cfg.mode = CONFIG_MODE_SNOOP;
+            printf("mode: snoop\n");
+            config_save_slow();
+            reboot(REBOOT_DELAY_MS);
+            return;
+        }
         else if (strcmp(argv[1], "clone") == 0)
         {
             config.cfg.mode = CONFIG_MODE_CLONE;
@@ -536,11 +545,14 @@ static void cmd_mode(int argc, const char *const *argv)
             printf("error: unknown mode.\n");
         }
     }
-    printf("mode emulator|clone\n");
+    printf("mode emulator|snoop|clone\n");
     switch (config.cfg.mode)
     {
     case CONFIG_MODE_EMULATOR:
         printf("current mode: emulator\n");
+        break;
+    case CONFIG_MODE_SNOOP:
+        printf("current mode: snoop\n");
         break;
     case CONFIG_MODE_CLONE:
         printf("current mode: clone\n");
@@ -1321,7 +1333,7 @@ static const command_table_t command_table_emulator[] =
     {"hello",   cmd_hello,      "test: hello, world"},
 
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
-    {"mode",    cmd_mode,       "select mode (mode emulator|clone)"},
+    {"mode",    cmd_mode,       "select mode (mode emulator|snoop|clone)"},
     {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
     {"gpio",    cmd_gpio,       "control GPIO (gpio help)"},
 
@@ -1361,7 +1373,7 @@ static const command_table_t command_table_clone[] =
     {"hello",   cmd_hello,      "test: hello, world"},
 
     {"reboot",  cmd_reboot,     "reboot RP27C512"},
-    {"mode",    cmd_mode,       "select mode (mode emulator|clone)"},
+    {"mode",    cmd_mode,       "select mode (mode emulator|snoop|clone)"},
     {"bootsel", cmd_bootsel,    "reboot RP27C512 in BOOTSEL mode"},
     {"gpio",    cmd_gpio,       "control GPIO (gpio help)"},
 
@@ -1500,6 +1512,7 @@ int main(void)
             rom_load_async_wait(ch);
         }
         break;
+    case CONFIG_MODE_SNOOP:
     case CONFIG_MODE_CLONE:
         {
             zero_clear(rom, sizeof(rom));
@@ -1557,8 +1570,12 @@ int main(void)
     switch (config.cfg.mode)
     {
     case CONFIG_MODE_EMULATOR:
+    case CONFIG_MODE_SNOOP:
         {
-            romemu_init(pio0, 0, rom);
+            if (config.cfg.mode == CONFIG_MODE_EMULATOR)
+            {
+                romemu_init(pio0, 0, rom);
+            }
             busmon_init(pio1, 0, ram);
 
             memcpy(capture_target, config.cfg.capture_target, sizeof(capture_target));
@@ -1603,6 +1620,9 @@ int main(void)
     {
     case CONFIG_MODE_EMULATOR:
         printf("mode: emulator\n");
+        break;
+    case CONFIG_MODE_SNOOP:
+        printf("mode: snoop\n");
         break;
     case CONFIG_MODE_CLONE:
         printf("mode: clone\n");
