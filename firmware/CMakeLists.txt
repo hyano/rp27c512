@@ -20,6 +20,7 @@ add_executable(rp27c512
   rp27c512.c
   romemu.c
   busmon.c
+  readline.c
   microrl-remaster/src/microrl/microrl.c
 )
 

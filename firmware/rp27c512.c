@@ -24,6 +24,7 @@
 
 #include "microrl.h"
 #include "xmodem.h"
+#include "readline.h"
 #include "section.h"
 
 #include "busmon.h"
@@ -849,6 +850,51 @@ static void cmd_dump_len(int argc, const char *const *argv)
     printf("current dump line count: %d\n", config.cfg.dump_line_count);
 }
 
+static void cmd_edit(int argc, const char *const *argv)
+{
+    static uint32_t addr = 0;
+    char buffer[3];
+    if (argc > 1)
+    {
+        addr = strtol(argv[1], NULL, 16) & 0xffff;
+    }
+    if (argc > 2)
+    {
+        uint32_t value;
+        char *end;
+        value = strtol(buffer, &end, 16);
+        if (*end == '\0')
+        {
+            device[addr] = value;
+        }
+    }
+    else
+    {
+        printf("edit end with '.'\n");
+        for (;;)
+        {
+            printf("%04x %02x : ", addr, device[addr]);
+            readline(buffer, sizeof(buffer));
+            if (buffer[0] == '.')
+            {
+                break;
+            }
+            else if (buffer[0] != '\0')
+            {
+                uint32_t value;
+                char *end;
+                value = strtol(buffer, &end, 16);
+                if (*end == '\0')
+                {
+                    device[addr] = value;
+                }
+            }
+
+            addr = (addr + 1) & 0xffff;
+        }
+    }
+}
+
 static void cmd_watch(int argc, const char *const *argv)
 {
     if (argc > 2)
@@ -1212,6 +1258,7 @@ static const command_table_t command_table_emulator[] =
     {"dw",      cmd_dump_watch, "dump device repeatly (dw address)"},
     {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
 
+    {"e",       cmd_edit,       "edit memory"},
 
     {"watch",   cmd_watch,      "set capture area"},
     {"unwatch", cmd_unwatch,    "unset capture area"},
@@ -1246,6 +1293,8 @@ static const command_table_t command_table_clone[] =
 
     {"d",       cmd_dump,       "dump device (d address)"},
     {"dlen",    cmd_dump_len,   "set dump line count (dlen count)"},
+
+    {"e",       cmd_edit,       "edit memory"},
 
     {"recv",    cmd_recv,       "receive data from host (XMODEM CRC)"},
     {"send",    cmd_send,       "send data to host (XMODEM 1K)"},
