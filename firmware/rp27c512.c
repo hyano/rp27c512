@@ -1483,6 +1483,9 @@ static void shell(void)
             char ch = (char)c;
             microrl_processing_input(&rl, &ch, 1);
         }
+
+        if (!tud_cdc_connected())
+            break;
     }
 }
 
@@ -1615,31 +1618,34 @@ int main(void)
         break;
     }
 
-    while (!tud_cdc_connected())
-        sleep_ms(100);
-    sleep_ms(250);
-
-    printf("\n");
-    printf("connected.\n");
-    printf("%s\n", MAGIC_STR);
-    printf("rom bank: %d\n", config.cfg.rom_bank);
-    switch (config.cfg.mode)
+    for (;;)
     {
-    case CONFIG_MODE_EMULATOR:
-        printf("mode: emulator\n");
-        break;
-    case CONFIG_MODE_SNOOP:
-        printf("mode: snoop\n");
-        break;
-    case CONFIG_MODE_CLONE:
-        printf("mode: clone\n");
-        break;
-    default:
-        printf("mode: unknown (%d)\n", config.cfg.mode);
-        break;
-    }
+        while (!tud_cdc_connected())
+            sleep_ms(100);
+        sleep_ms(250);
 
-    shell();
+        printf("\n");
+        printf("connected.\n");
+        printf("%s\n", MAGIC_STR);
+        printf("rom bank: %d\n", config.cfg.rom_bank);
+        switch (config.cfg.mode)
+        {
+        case CONFIG_MODE_EMULATOR:
+            printf("mode: emulator\n");
+            break;
+        case CONFIG_MODE_SNOOP:
+            printf("mode: snoop\n");
+            break;
+        case CONFIG_MODE_CLONE:
+            printf("mode: clone\n");
+            break;
+        default:
+            printf("mode: unknown (%d)\n", config.cfg.mode);
+            break;
+        }
+
+        shell();
+    }
 
     return 0;
 }
