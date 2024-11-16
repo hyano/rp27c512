@@ -43,7 +43,7 @@
 #define GPIO_EXT0 24
 #define GPIO_EXT1 25
 #define GPIO_EXT2 26
-#define GPIO_CS 27
+#define GPIO_CE 27
 #define GPIO_OE 28
 #define GPIO_WR 29
 #define GPIO_END 30
@@ -51,7 +51,7 @@
 #define GPIO_ALL_MASK ((1 << GPIO_END) - 1)
 #define GPIO_ADDR_MASK (((1 << (GPIO_ADDR_END - GPIO_ADDR)) - 1) << GPIO_ADDR)
 #define GPIO_DATA_MASK (((1 << (GPIO_DATA_END - GPIO_DATA)) - 1) << GPIO_DATA)
-#define GPIO_CS_MASK (1 << GPIO_CS)
+#define GPIO_CE_MASK (1 << GPIO_CE)
 #define GPIO_OE_MASK (1 << GPIO_OE)
 #define GPIO_EXT0_MASK (1 << GPIO_EXT0)
 #define GPIO_EXT1_MASK (1 << GPIO_EXT1)
@@ -398,7 +398,7 @@ static void reboot(uint32_t delay_ms)
 
 static void read_rom(uint8_t *dst, uint32_t start, uint32_t end)
 {
-    gpio_put_all(bit(GPIO_CS) | bit(GPIO_OE));
+    gpio_put_all(bit(GPIO_CE) | bit(GPIO_OE));
     sleep_us(1);
     for (uint32_t addr = start; addr < end; addr++)
     {
@@ -408,7 +408,7 @@ static void read_rom(uint8_t *dst, uint32_t start, uint32_t end)
         sleep_us(1);
         dst[addr] = GPIO_GET_DATA(gpio_get_all());
     }
-    gpio_put_all(bit(GPIO_CS) | bit(GPIO_OE));
+    gpio_put_all(bit(GPIO_CE) | bit(GPIO_OE));
 }
 
 static void core1_entry_emulator(void)
@@ -562,7 +562,7 @@ static struct
     {"d5",          GPIO_DATA + 5},
     {"d6",          GPIO_DATA + 6},
     {"d7",          GPIO_DATA + 7},
-    {"cs",          GPIO_CS},
+    {"ce",          GPIO_CE},
     {"oe",          GPIO_OE},
     {"wr",          GPIO_WR},
     {"ext0",        GPIO_EXT0},
@@ -1364,7 +1364,7 @@ int main(void)
             gpio_pull_down(pin);
         }
     }
-    gpio_pull_up(GPIO_CS);
+    gpio_pull_up(GPIO_CE);
     gpio_pull_up(GPIO_OE);
     gpio_pull_up(GPIO_WR);
 #endif
@@ -1402,7 +1402,7 @@ int main(void)
     }
     else if (config.cfg.mode == CONFIG_MODE_CLONE)
     {
-        gpio_set_dir_out_masked(GPIO_ADDR_MASK | GPIO_CS_MASK | GPIO_OE_MASK);
+        gpio_set_dir_out_masked(GPIO_ADDR_MASK | GPIO_CE_MASK | GPIO_OE_MASK);
         gpio_set_dir_in_masked(GPIO_DATA_MASK);
         for (uint pin = GPIO_ADDR; pin < GPIO_ADDR_END; pin++)
         {
@@ -1413,8 +1413,8 @@ int main(void)
         {
             gpio_pull_up(pin);
         }
-        gpio_pull_up(GPIO_CS);
-        gpio_set_drive_strength(GPIO_CS, GPIO_DRIVE_STRENGTH_12MA);
+        gpio_pull_up(GPIO_CE);
+        gpio_set_drive_strength(GPIO_CE, GPIO_DRIVE_STRENGTH_12MA);
         gpio_pull_up(GPIO_OE);
         gpio_set_drive_strength(GPIO_OE, GPIO_DRIVE_STRENGTH_12MA);
 

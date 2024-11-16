@@ -6,7 +6,7 @@
 ; pin 0-15      A0-A15
 ; pin 16-23     D0-D7
 ; pin 24-26     EXT
-; pin 27        /CS
+; pin 27        /CE
 ; pin 28        /OE
 ; pin 29        /WR
 
@@ -39,14 +39,14 @@ public entry_point:
 .define PUBLIC ctrl_bus_width   3
 .define PUBLIC data_bus_offset  (addr_bus_width)
 .define PUBLIC ctrl_bus_offset  (addr_bus_width + data_bus_width + ext_bits_width)
-.define csoe_bit_width          2
+.define ceoe_bit_width          2
 
 public entry_point:
 .wrap_target
 oe_loop:
-    mov     osr, pins                   ; read /CS,/OE
-    out     x, csoe_bit_width
-    jmp     !x, oe_out                  ; /CS = 0 && /OE == 0
+    mov     osr, pins                   ; read /E,/OE
+    out     x, ceoe_bit_width
+    jmp     !x, oe_out                  ; /CE = 0 && /OE == 0
 
     mov     osr, null
     out     pindirs, data_bus_width     ; High-Z (input)

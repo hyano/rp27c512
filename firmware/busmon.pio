@@ -6,7 +6,7 @@
 ; pin 0-15      A0-A15
 ; pin 16-23     D0-D7
 ; pin 24-26     EXT
-; pin 27        /CS
+; pin 27        /CE
 ; pin 28        /OE
 ; pin 29        /WR
 
