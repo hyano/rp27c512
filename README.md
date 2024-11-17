@@ -130,7 +130,7 @@ snoopモードとcloneモードでROMを接続しやすくするための基板�
 
 ```sh
 git clone https://github.com/hyano/rp27c512.git
-cd rp27c512
+cd rp27c512/firmware
 mkdir build
 cd build
 cmake ..
