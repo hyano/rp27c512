@@ -368,8 +368,8 @@ https://github.com/user-attachments/assets/20a8eae4-5df2-4a57-8465-a8b28be44191
 
 ## 参考文献・ソフトウェア
 
-* [An RP2040-based ROM emulator](https://github.com/wickerwaka/PicoROM)
-* [PIO/DMA implementation of picoROM project to simulate an EEPROM using a Raspberry Pico](https://github.com/rhulme/picoROM_pio)
+* [PicoROM: An RP2040-based ROM emulator](https://github.com/wickerwaka/PicoROM)
+* [picoROM_pio: PIO/DMA implementation of picoROM project to simulate an EEPROM using a Raspberry Pico](https://github.com/rhulme/picoROM_pio)
 * [Raspberry Pi Pico-series C/C++ SDK](https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf)
 * [RP2040 Datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)
 
