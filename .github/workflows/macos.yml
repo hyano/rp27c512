@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G "Unix Makefiles" -DPICO_SDK_PATH=${{ PICO_SDK_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPICO_BOARD=${{ env.PICO_BOARD }}
+          cmake .. -G "Unix Makefiles" -DPICO_SDK_PATH=${{ env.PICO_SDK_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPICO_BOARD=${{ env.PICO_BOARD }}
           cmake --build . --parallel ${{ env.NPROC }}
 
       - name: Upload
