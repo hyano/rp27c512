@@ -7,7 +7,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   PROJECT_NAME: rp27c512
-  PROJECT_DIR: $PROJECT_NAME/firmware
+  PROJECT_DIR: rp27c512/firmware
   BUILD_TYPE: Release
   PICO_SDK_VERSION: 2.0.0
   PICO_BOARD: pico
@@ -45,7 +45,7 @@ jobs:
           brew install --cask gcc-arm-embedded
 
       - name: Build Project
-        working-directory: ${{github.workspace}}/${{ env.PROJECT_DIR }}
+        working-directory: ${{ github.workspace }}/${{ env.PROJECT_DIR }}
         shell: bash
         run: |
           mkdir build
