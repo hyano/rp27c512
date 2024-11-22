@@ -51,7 +51,7 @@ jobs:
           mkdir build
           cd build
           cmake .. -G "Unix Makefiles" -DPICO_SDK_PATH=../../pico-sdk -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPICO_BOARD=${{ env.PICO_BOARD }}
-          cmake --build . --parallel ${{ NPROC }}
+          cmake --build . --parallel ${{ env.NPROC }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
