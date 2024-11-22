@@ -1020,6 +1020,12 @@ static microrlr_t prv_control_char_process(microrl_t* mrl, char ch) {
 #endif /* MICRORL_CFG_USE_CTRL_C */
             break;
         }
+        case MICRORL_ESC_ANSI_FF: { /* ^L */
+            mrl->out_fn(mrl, "\033[2J");
+            prv_terminal_print_prompt(mrl);
+            prv_terminal_print_line(mrl, 0, 0);
+            break;
+        }
         default:
             break;
     }
