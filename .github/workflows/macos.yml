@@ -10,6 +10,7 @@ env:
   PROJECT_DIR: rp27c512/firmware
   BUILD_TYPE: Release
   PICO_SDK_VERSION: 2.0.0
+  PICO_SDK_PATH: ../../../pico-sdk
   PICO_BOARD: pico
   NPROC: 3
 
@@ -50,7 +51,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G "Unix Makefiles" -DPICO_SDK_PATH=../../pico-sdk -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPICO_BOARD=${{ env.PICO_BOARD }}
+          cmake .. -G "Unix Makefiles" -DPICO_SDK_PATH=${{ PICO_SDK_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPICO_BOARD=${{ env.PICO_BOARD }}
           cmake --build . --parallel ${{ env.NPROC }}
 
       - name: Upload
